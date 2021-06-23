@@ -1,14 +1,21 @@
 org: revolutionmortgage
-app: replace-me
-service: replace-me
+app: credit-plus
+service: cp-efolder-upload
 
 custom:
-    stage: ${opt:stage, self:provider.stage}
-    profile:
-      prod: prodAccount
-      stage: stageAccount
-      dev: devAccount
-      pr: prAccount
+  stage: ${opt:stage, self:provider.stage}
+  profile:
+    prod: prodAccount
+    stage: stageAccount
+    dev: devAccount
+    pr: prAccount
+  encompassApiBaseUrl:
+    prod: https://elliemae-api-proxy.rmtg.io
+    stage: https://elliemae-api-proxy.stagerm.io
+    dev: https://elliemae-api-proxy.devrm.io
+    pr: https://elliemae-api-proxy.prrm.io
+  creditPlusEventBusName: "${self:custom.stage}-credit-plus"
+  creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
 
 provider:
   name: aws
@@ -17,21 +24,31 @@ provider:
   profile: ${self:custom.profile.${self:custom.stage}}
   region: us-east-2
   tracing:
-    apiGateway: true
     lambda: true
-  logs:
-    restApi: true
   environment:
     REGEN_CF_VARS: Change me # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
+    ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
+    ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:BpdHooks:SecretString:encompassClientId}}"
+    ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:BpdHooks:SecretString:encompassClientSecret}}"
+    ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:BpdHooks:SecretString:encompassSmartClientUser}}"
+    ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:BpdHooks:SecretString:encompassSmartClientPassword}}"
+
 functions:
-  branchApiGwRoute:
-    handler: src/functions/lambda.handler
+  eFolderUDNReportUpload:
+    handler: src/functions/eFolderUDNReportUpload.handler
     events:
       - eventBridge:
-          eventBus: ARN To Event Bus Goes here
+          eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
             source:
-              - "com.revolutionmortgage.something"
+              - "lambda"
+            detail-type:
+              - "Loan"
+            detail:
+              event:
+                - "Lambda Function Invocation Result - Succeeded"
+            resources:
+              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-get-udn-orders"
 
 resources:
   - ${file(./resources/alarms.yml)}
