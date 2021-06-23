@@ -1,0 +1,13 @@
+name: "Deploy"
+description: "Deploys microservice"
+runs:
+  using: "composite"
+  steps:
+    - name: install serverless
+      run: npm install -g serverless
+      shell: bash
+
+    - name: serverless deploy
+      run: |
+        serverless deploy --stage=${ENV}
+      shell: bash

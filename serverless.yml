@@ -1,0 +1,41 @@
+org: revolutionmortgage
+app: replace-me
+service: replace-me
+
+custom:
+    stage: ${opt:stage, self:provider.stage}
+    profile:
+      prod: prodAccount
+      stage: stageAccount
+      dev: devAccount
+      pr: prAccount
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  profile: ${self:custom.profile.${self:custom.stage}}
+  region: us-east-2
+  tracing:
+    apiGateway: true
+    lambda: true
+  logs:
+    restApi: true
+  environment:
+    REGEN_CF_VARS: Change me # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
+functions:
+  branchApiGwRoute:
+    handler: src/functions/lambda.handler
+    events:
+      - eventBridge:
+          eventBus: ARN To Event Bus Goes here
+          pattern:
+            source:
+              - "com.revolutionmortgage.something"
+
+resources:
+  - ${file(./resources/alarms.yml)}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-pseudo-parameters
