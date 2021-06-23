@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@revolutionmortgage/rm-logger": "^0.0.14",
-        "lodash": "^4.17.20"
+        "lodash": "^4.17.21"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.11.5",

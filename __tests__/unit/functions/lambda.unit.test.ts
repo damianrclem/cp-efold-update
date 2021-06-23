@@ -1,4 +1,4 @@
-import { handler } from '../../../src/functions/lambda';
+import { handler } from '../../../src/functions/eFolderUDNReportUpload';
 
 describe('Lambda tests', () => {
     test('It runs', () => {
