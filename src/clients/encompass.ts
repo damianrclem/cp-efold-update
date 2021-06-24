@@ -1,7 +1,7 @@
 import get from 'lodash/get';
 import qs from 'qs';
 import { LoggerError } from '@revolutionmortgage/rm-logger';
-import axios, { AxiosPromise, AxiosResponse, Method } from 'axios';
+import axios, { AxiosResponse, Method } from 'axios';
 
 const RM_CLIENT = 'cp-efolder-upload';
 
