@@ -24,6 +24,13 @@ const getBaseUrl = (): string => {
     return baseUrl as string;
 }
 
+/**
+ * Makes a request to the Elliemae API with an access token
+ * @param {Method} method - the request method
+ * @param {string} endpoint - the endpoint to make a request against
+ * @param {any} data - the request body
+ * @returns {Promise<AxiosResponse<any>>}
+ */
 const callApi = async (
     method: Method,
     endpoint: string,
@@ -87,23 +94,72 @@ const getToken = async (): Promise<string> => {
     return token;
 }
 
-
-
-export const getLoanDocuments = async (loanId: string): Promise<AxiosResponse<any>> => {
-    return await callApi('get', `/loans/${loanId}/documents`);
+/**
+ * Retrieves a loan from the API
+ * @param {string} loanId - The id of the loan
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const getLoan = async (loanId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('get', `/encompass/v3/loans/${loanId}`)
 }
 
-export const createLoanDocument = async (
-    loanId: string,
-    document: {
-        title: string,
-        applicantId: string
-    }) => {
-    return await callApi('patch', `/loans/${loanId}/documents?action=add`, {
-        title: document.title,
+/**
+ * Retrieves the loan's documents from the API
+ * @param {string} loanId - The id of the loan
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const getLoanDocuments = async (loanId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('get', `/encompass/v3/loans/${loanId}/documents`);
+}
+
+/**
+ * Create a document on a loan
+ * @param {string} loanId - The id of the loan
+ * @param {string} applicantId - The applicant this document is tied to
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const createLoanDocument = async (loanId: string, applicantId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('patch', `/encompass/v3/loans/${loanId}/documents?action=add`, {
+        title: 'Credit - LQCC',
+        description: 'Credit update - Softpull or UDN report',
         applicant: {
-            entityId: document.applicantId,
+            entityId: applicantId,
             entityType: "Applicant"
+        }
+    });
+}
+
+/**
+ * Create a URL to upload an attach to a loan and a loan's document
+ * @param {string} loanId - The id of the loan
+ * @param {string} loanDocumentId - The id of the loan document
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('post', `/encompass/v3/loans/${loanId}/attachmentUploadUrl`, {
+        assignTo: {
+            entityId: loanDocumentId,
+            entityType: 'Document'
+        },
+        file: {
+            contentType: 'application/pdf',
+            name: 'report.pdf' // TODO: find out if this name is appropriate
+        },
+    });
+}
+
+/**
+ * Upload an attachment using a url
+ * @param {string} uploadAttachmentUrl - The url to upload an attachment file. This can be created using the `createLoanAttachmentUrl` function.
+ * @param {Buffer} file - The file you want to upload
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer): Promise<AxiosResponse<any>> => {
+    const token = getToken();
+
+    return await axios.put(uploadAttachmentUrl, file, {
+        headers: {
+            'Authorization': `Bearer ${token}`
         }
     });
 }
