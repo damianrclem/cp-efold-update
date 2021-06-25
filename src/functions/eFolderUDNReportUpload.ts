@@ -56,6 +56,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const existingLoanDocument = getLoanDocumentByTitleAndBorrowerName(loanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE, borrower.fullName);
     if (existingLoanDocument) {
         await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
+        return;
     }
 
     const newLoanDocumentRepsonse = await createLoanDocument(loanId, borrower.applicationId);
