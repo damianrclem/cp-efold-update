@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { getEncompassLoanBorrowerBySocialSecurityNumber, NoLoanApplicationsError, NoLoanBorrowerWithMatchingSSNError } from '../../../src/logic/getEncompassLoanBorrowerBySocialSecurityNumber';
 
 describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
@@ -6,6 +8,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
         const loan = {
             applications: [
                 {
+                    id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
                         taxIdentificationNumber: '123-45-6789'
@@ -15,8 +18,11 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
         }
         const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(ssn, loan)
 
-        expect(borrower.taxIdentificationNumber).toEqual('123-45-6789');
-        expect(borrower.fullName).toEqual("Joe Mama")
+        expect(borrower).toEqual({
+            applicationId: 'appId',
+            taxIdentificationNumber: '123-45-6789',
+            fullName: 'Joe Mama'
+        })
     });
 
     test('returns the coborrower on the loan with the specified social security number', () => {
@@ -24,6 +30,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
         const loan = {
             applications: [
                 {
+                    id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
                         taxIdentificationNumber: '123-45-6789'
@@ -37,8 +44,11 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
         }
         const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(ssn, loan)
 
-        expect(borrower.taxIdentificationNumber).toEqual('098-76-5432');
-        expect(borrower.fullName).toEqual("Bert Erking")
+        expect(borrower).toEqual({
+            applicationId: 'appId',
+            taxIdentificationNumber: '098-76-5432',
+            fullName: 'Bert Erking'
+        })
     })
 
     test('throws an error if no borrowers have matching SSN', () => {
@@ -46,6 +56,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
         const loan = {
             applications: [
                 {
+                    id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
                         taxIdentificationNumber: '123-45-6789'

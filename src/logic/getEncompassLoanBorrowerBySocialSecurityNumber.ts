@@ -3,9 +3,11 @@ import { LoggerError } from "@revolutionmortgage/rm-logger"
 interface Borrower {
     fullName: string
     taxIdentificationNumber: string
+    applicationId: string;
 }
 
-interface Applications {
+interface Application {
+    id: string
     borrower: Borrower
     coborrower?: Borrower
 }
@@ -33,14 +35,44 @@ const formatAsSocialSecurityNumber = (socialSecurityNumber: string): string => {
 /**
  * Gets a borrower on the loan by social security number
  * @param {string} socialSecurityNumber - The social security number to find the borrower
+ * @param {Array<Application>} applications - The applications to search
+ * @param {'borrower' | 'coborrower'} borrowerType - The applications on the loan
+ * @returns {Borrower | undefined}
+ */
+const getBorrower = (
+    socialSecurityNumber: string,
+    applications: Array<Application>,
+    borrowerType: 'borrower' | 'coborrower'
+): Borrower | undefined => {
+    const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
+    const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationNumber === formattedSSN);
+    if (!application) {
+        return;
+    }
+
+    const borrower = application[borrowerType];
+    if (!borrower) {
+        return;
+    }
+
+    return {
+        fullName: borrower.fullName,
+        taxIdentificationNumber: borrower.taxIdentificationNumber,
+        applicationId: application.id
+    };
+}
+
+/**
+ * Gets a borrower on the loan by social security number
+ * @param {string} socialSecurityNumber - The social security number to find the borrower
  * @param {Object} loan - The social security number to find the borrower
- * @param {Array<Applications>} loan.applications - The applications on the loan
+ * @param {Array<Application>} loan.applications - The applications on the loan
  * @returns {Borrower}
  */
 export const getEncompassLoanBorrowerBySocialSecurityNumber = (
     socialSecurityNumber: string,
     loan: {
-        applications: Array<Applications>
+        applications: Array<Application>
     }
 ): Borrower => {
     const { applications } = loan;
@@ -48,18 +80,16 @@ export const getEncompassLoanBorrowerBySocialSecurityNumber = (
         throw new NoLoanApplicationsError(loan);
     }
 
-    const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
-
     // Find matching borrowers first
-    const applicationWithMatchingBorrower = applications.find((application: Applications) => application.borrower.taxIdentificationNumber === formattedSSN)
-    if (applicationWithMatchingBorrower?.borrower) {
-        return applicationWithMatchingBorrower.borrower;
+    const applicationWithMatchingBorrower = getBorrower(socialSecurityNumber, applications, 'borrower');
+    if (applicationWithMatchingBorrower) {
+        return applicationWithMatchingBorrower;
     }
 
     // If we did not find any matching borrowers, check the applications coborrowers
-    const applicationWithMatchingCoborrower = applications.find((application: Applications) => application.coborrower && application.coborrower.taxIdentificationNumber === formattedSSN)
-    if (applicationWithMatchingCoborrower?.coborrower) {
-        return applicationWithMatchingCoborrower.coborrower;
+    const applicationWithMatchingCoborrower = getBorrower(socialSecurityNumber, applications, 'coborrower');
+    if (applicationWithMatchingCoborrower) {
+        return applicationWithMatchingCoborrower;
     }
 
     // If we did not find anything, throw an Error
