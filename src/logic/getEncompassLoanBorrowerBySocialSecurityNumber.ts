@@ -49,7 +49,6 @@ export const getEncompassLoanBorrowerBySocialSecurityNumber = (
     }
 
     const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
-    console.log(socialSecurityNumber, formattedSSN)
 
     // Find matching borrowers first
     const applicationWithMatchingBorrower = applications.find((application: Applications) => application.borrower.taxIdentificationNumber === formattedSSN)
