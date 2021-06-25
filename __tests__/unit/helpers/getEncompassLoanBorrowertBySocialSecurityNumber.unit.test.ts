@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { getEncompassLoanBorrowerBySocialSecurityNumber, NoLoanApplicationsError, NoLoanBorrowerWithMatchingSSNError } from '../../../src/logic/getEncompassLoanBorrowerBySocialSecurityNumber';
+import { getEncompassLoanBorrowerBySocialSecurityNumber, NoLoanApplicationsError, NoLoanBorrowerWithMatchingSSNError } from '../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
 
 describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
     test('returns the borrower on the loan with the specified social security number', () => {

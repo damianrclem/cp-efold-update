@@ -1,4 +1,4 @@
-import { getLoanDocumentByTitleAndBorrowerName } from '../../../src/logic/getLoanDocumentByTitleAndBorrowerName';
+import { getLoanDocumentByTitleAndBorrowerName } from '../../../src/helpers/getLoanDocumentByTitleAndBorrowerName';
 
 describe('getLoanDocumentByTitleAndBorrowerName', () => {
     const loanDocuments = [{

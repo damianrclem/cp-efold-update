@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { uploadUDNReportToEFolder } from "../../../src/logic/uploadUDNReportToEFolder";
+import { uploadUDNReportToEFolder } from "../../../src/helpers/uploadUDNReportToEFolder";
 import { createLoanAttachmentUrl } from "../../../src/clients/encompass";
 
 jest.mock('../../../src/clients/encompass', () => ({

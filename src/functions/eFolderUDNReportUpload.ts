@@ -3,9 +3,9 @@ import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
 import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
-import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../logic/getEncompassLoanBorrowerBySocialSecurityNumber';
-import { getLoanDocumentByTitleAndBorrowerName } from '../logic/getLoanDocumentByTitleAndBorrowerName';
-import { uploadUDNReportToEFolder } from '../logic/uploadUDNReportToEFolder';
+import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
+import { getLoanDocumentByTitleAndBorrowerName } from '../helpers/getLoanDocumentByTitleAndBorrowerName';
+import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 
 export class InvalidParamsError extends LoggerError {
     constructor(message: string, data?: any) {

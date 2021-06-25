@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { handler, InvalidParamsError } from '../../../src/functions/eFolderUDNReportUpload';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
-import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/logic/getEncompassLoanBorrowerBySocialSecurityNumber";
-import { getLoanDocumentByTitleAndBorrowerName } from "../../../src/logic/getLoanDocumentByTitleAndBorrowerName";
+import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
+import { getLoanDocumentByTitleAndBorrowerName } from "../../../src/helpers/getLoanDocumentByTitleAndBorrowerName";
 
 jest.mock('../../../src/clients/encompass', () => ({
     getLoan: jest.fn(),
