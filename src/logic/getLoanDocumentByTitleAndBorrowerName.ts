@@ -1,4 +1,5 @@
 interface LoanDocument {
+    id: string;
     title: string;
     application: {
         entityName: string;
