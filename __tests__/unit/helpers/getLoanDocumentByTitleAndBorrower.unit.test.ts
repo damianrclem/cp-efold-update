@@ -2,6 +2,7 @@ import { getLoanDocumentByTitleAndBorrowerName } from '../../../src/helpers/getL
 
 describe('getLoanDocumentByTitleAndBorrowerName', () => {
     const loanDocuments = [{
+        id: 'boop',
         title: 'hello',
         application: {
             entityName: 'Bert McDonald'

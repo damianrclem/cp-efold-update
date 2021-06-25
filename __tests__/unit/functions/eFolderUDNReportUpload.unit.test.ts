@@ -10,15 +10,15 @@ jest.mock('../../../src/clients/encompass', () => ({
     createLoanDocument: jest.fn()
 }))
 
-jest.mock("../../../src/logic/getEncompassLoanBorrowerBySocialSecurityNumber", () => ({
+jest.mock("../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber", () => ({
     getEncompassLoanBorrowerBySocialSecurityNumber: jest.fn()
 }))
 
-jest.mock("../../../src/logic/getLoanDocumentByTitleAndBorrowerName", () => ({
+jest.mock("../../../src/helpers/getLoanDocumentByTitleAndBorrowerName", () => ({
     getLoanDocumentByTitleAndBorrowerName: jest.fn()
 }))
 
-jest.mock("../../../src/logic/uploadUDNReportToEFolder", () => ({
+jest.mock("../../../src/helpers/uploadUDNReportToEFolder", () => ({
     uploadUDNReportToEFolder: jest.fn()
 }))
 
