@@ -2,7 +2,7 @@ import { LoggerError } from '@revolutionmortgage/rm-logger';
 import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 
-class InvalidParamsError extends LoggerError {
+export class InvalidParamsError extends LoggerError {
     constructor(message: string, data?: any) {
         super(message, data);
     }
@@ -29,12 +29,17 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
-    const loanId = get(event, 'requestPayload.detail.LoanId');
+    const loanId = get(event, 'detail.requestPayload.detail.LoanId');
     if (!loanId) {
         throw new InvalidParamsError("LoanId missing on request payload", event);
     }
 
-    const pdf = get(event, 'responsePayload.pdf');
+    const socialSecurityNumber = get(event, 'detail.requestPayload.detail.SocialSecurityNumber');
+    if (!socialSecurityNumber) {
+        throw new InvalidParamsError("SocialSecurityNumber missing on request payload");
+    }
+
+    const pdf = get(event, 'detail.responsePayload.pdf');
     if (!pdf) {
         throw new InvalidParamsError("pdf missing on response payload", event);
     }
