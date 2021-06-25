@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import qs from 'qs';
 import { LoggerError } from '@revolutionmortgage/rm-logger';
 import axios, { AxiosResponse, Method } from 'axios';
+import { UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
 
 const RM_CLIENT = 'cp-efolder-upload';
 
@@ -22,33 +23,6 @@ const getBaseUrl = (): string => {
     if (!baseUrl) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_BASE_URL');
 
     return baseUrl as string;
-}
-
-/**
- * Makes a request to the Elliemae API with an access token
- * @param {Method} method - the request method
- * @param {string} endpoint - the endpoint to make a request against
- * @param {any} data - the request body
- * @returns {Promise<AxiosResponse<any>>}
- */
-const callApi = async (
-    method: Method,
-    endpoint: string,
-    data?: any
-): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
-    const baseUrl = getBaseUrl();
-
-    const url = `${baseUrl}${endpoint};`
-    return await axios({
-        method: method,
-        url: url,
-        data,
-        headers: {
-            'x-rm-client': RM_CLIENT,
-            'Authorization': `Bearer ${token}`,
-        }
-    });
 }
 
 /**
@@ -95,6 +69,33 @@ const getToken = async (): Promise<string> => {
 }
 
 /**
+ * Makes a request to the Elliemae API with an access token
+ * @param {Method} method - the request method
+ * @param {string} endpoint - the endpoint to make a request against
+ * @param {any} data - the request body
+ * @returns {Promise<AxiosResponse<any>>}
+ */
+const callApi = async (
+    method: Method,
+    endpoint: string,
+    data?: any
+): Promise<AxiosResponse<any>> => {
+    const token = await getToken();
+    const baseUrl = getBaseUrl();
+
+    const url = `${baseUrl}${endpoint};`
+    return await axios({
+        method: method,
+        url: url,
+        data,
+        headers: {
+            'x-rm-client': RM_CLIENT,
+            'Authorization': `Bearer ${token}`,
+        }
+    });
+}
+
+/**
  * Retrieves a loan from the API
  * @param {string} loanId - The id of the loan
  * @returns {Promise<AxiosResponse<any>>}
@@ -115,15 +116,15 @@ export const getLoanDocuments = async (loanId: string): Promise<AxiosResponse<an
 /**
  * Create a document on a loan
  * @param {string} loanId - The id of the loan
- * @param {string} applicantId - The applicant this document is tied to
+ * @param {string} applicationId - The application this document is tied to
  * @returns {Promise<AxiosResponse<any>>}
  */
-export const createLoanDocument = async (loanId: string, applicantId: string): Promise<AxiosResponse<any>> => {
+export const createLoanDocument = async (loanId: string, applicationId: string): Promise<AxiosResponse<any>> => {
     return await callApi('patch', `/encompass/v3/loans/${loanId}/documents?action=add`, {
-        title: 'Credit - LQCC',
-        description: 'Credit update - Softpull or UDN report',
-        applicant: {
-            entityId: applicantId,
+        title: UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE,
+        description: UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION,
+        application: {
+            entityId: applicationId,
             entityType: "Applicant"
         }
     });
