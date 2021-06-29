@@ -146,6 +146,7 @@ export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: st
             entityType: 'Document'
         },
         file: {
+            size: fileSize,
             contentType: 'application/pdf',
             name: `${title}.pdf`
         },
