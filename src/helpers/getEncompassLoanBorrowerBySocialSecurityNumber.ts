@@ -15,7 +15,7 @@ interface Application {
 
 export class NoLoanApplicationsError extends LoggerError {
     constructor(data: any) {
-        super('No applicants exist on loan', data)
+        super('No applications exist on loan', data)
     }
 }
 

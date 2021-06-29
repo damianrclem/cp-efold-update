@@ -125,7 +125,7 @@ export const createLoanDocument = async (loanId: string, applicationId: string):
         description: UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION,
         application: {
             entityId: applicationId,
-            entityType: "Applicant"
+            entityType: "Application"
         }
     });
 }
