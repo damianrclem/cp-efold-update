@@ -1,4 +1,4 @@
-import { getLoanDocumentByTitleAndBorrowerName } from '../../../src/helpers/getLoanDocumentByTitleAndBorrowerName';
+import { getLoanDocumentByTitle } from '../../../src/helpers/getLoanDocumentByTitle';
 
 describe('getLoanDocumentByTitleAndBorrowerName', () => {
     const loanDocuments = [{
@@ -10,22 +10,12 @@ describe('getLoanDocumentByTitleAndBorrowerName', () => {
     }]
 
     test('it returns the loan document if the title and borrower name match', () => {
-        const result = getLoanDocumentByTitleAndBorrowerName(loanDocuments, 'hello', 'Bert McDonald');
+        const result = getLoanDocumentByTitle(loanDocuments, 'hello');
         expect(result).toEqual(loanDocuments[0]);
     });
 
-    test('it returns undefined if the title matches and borrower name does not match', () => {
-        const result = getLoanDocumentByTitleAndBorrowerName(loanDocuments, 'goodbye', 'Bert McDoland');
-        expect(result).toEqual(undefined);
-    });
-
-    test('it returns undefined if the title does not match and the borrower name does', () => {
-        const result = getLoanDocumentByTitleAndBorrowerName(loanDocuments, 'hello', 'Jeanie Black');
-        expect(result).toEqual(undefined);
-    });
-
-    test('it returns undefined if both the title and borrower name does not match', () => {
-        const result = getLoanDocumentByTitleAndBorrowerName(loanDocuments, 'Microsoft Sucks', 'Satya Nadella');
+    test('it returns undefined if the title does not match', () => {
+        const result = getLoanDocumentByTitle(loanDocuments, 'goodbye');
         expect(result).toEqual(undefined);
     });
 })

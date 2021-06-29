@@ -4,7 +4,7 @@ import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
 import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
-import { getLoanDocumentByTitleAndBorrowerName } from '../helpers/getLoanDocumentByTitleAndBorrowerName';
+import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 
 export class InvalidParamsError extends LoggerError {
@@ -53,12 +53,13 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
 
     const loanDocumentsResponse = await getLoanDocuments(loanId);
-    const existingLoanDocument = getLoanDocumentByTitleAndBorrowerName(loanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE, borrower.fullName);
+    const existingLoanDocument = getLoanDocumentByTitle(loanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
     if (existingLoanDocument) {
         await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
         return;
     }
 
     const newLoanDocumentRepsonse = await createLoanDocument(loanId, borrower.applicationId);
-    await uploadUDNReportToEFolder(loanId, newLoanDocumentRepsonse.data.id, pdf);
+    console.log('new', newLoanDocumentRepsonse)
+    await uploadUDNReportToEFolder(loanId, newLoanDocumentRepsonse.data[0].id, pdf);
 };
