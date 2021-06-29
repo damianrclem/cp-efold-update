@@ -134,17 +134,20 @@ export const createLoanDocument = async (loanId: string, applicationId: string):
  * Create a URL to upload an attach to a loan and a loan's document
  * @param {string} loanId - The id of the loan
  * @param {string} loanDocumentId - The id of the loan document
+ * @param {number} fileSize - The fize of the file attachment
+ * @param {string} title - The title of the attachment
  * @returns {Promise<AxiosResponse<any>>}
  */
-export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: string): Promise<AxiosResponse<any>> => {
+export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: string, fileSize: number, title: string): Promise<AxiosResponse<any>> => {
     return await callApi('post', `/encompass/v3/loans/${loanId}/attachmentUploadUrl`, {
+        title,
         assignTo: {
             entityId: loanDocumentId,
             entityType: 'Document'
         },
         file: {
             contentType: 'application/pdf',
-            name: 'report.pdf' // TODO: find out if this name is appropriate
+            name: `${title}.pdf`
         },
     });
 }

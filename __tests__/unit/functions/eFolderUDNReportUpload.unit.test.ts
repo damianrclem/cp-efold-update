@@ -2,7 +2,7 @@
 import { handler, InvalidParamsError } from '../../../src/functions/eFolderUDNReportUpload';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
-import { getLoanDocumentByTitleAndBorrowerName } from "../../../src/helpers/getLoanDocumentByTitleAndBorrowerName";
+import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
 
 jest.mock('../../../src/clients/encompass', () => ({
     getLoan: jest.fn(),
@@ -79,7 +79,7 @@ describe('eFolderUDNReportUpload', () => {
             })
         }))
 
-        getLoanDocumentByTitleAndBorrowerName.mockReturnValue({
+        getLoanDocumentByTitle.mockReturnValue({
             id: 'hey yo'
         })
 
