@@ -36,6 +36,7 @@ provider:
 functions:
   eFolderUDNReportUpload:
     handler: src/functions/eFolderUDNReportUpload.handler
+    timeout: 30
     events:
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
