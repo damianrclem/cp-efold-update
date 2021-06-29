@@ -11,7 +11,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
                     id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
-                        taxIdentificationNumber: '123-45-6789'
+                        taxIdentificationIdentifier: '123-45-6789'
                     }
                 }
             ]
@@ -20,7 +20,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
 
         expect(borrower).toEqual({
             applicationId: 'appId',
-            taxIdentificationNumber: '123-45-6789',
+            taxIdentificationIdentifier: '123-45-6789',
             fullName: 'Joe Mama'
         })
     });
@@ -33,11 +33,11 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
                     id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
-                        taxIdentificationNumber: '123-45-6789'
+                        taxIdentificationIdentifier: '123-45-6789'
                     },
                     coborrower: {
                         fullName: 'Bert Erking',
-                        taxIdentificationNumber: '098-76-5432'
+                        taxIdentificationIdentifier: '098-76-5432'
                     }
                 }
             ]
@@ -46,7 +46,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
 
         expect(borrower).toEqual({
             applicationId: 'appId',
-            taxIdentificationNumber: '098-76-5432',
+            taxIdentificationIdentifier: '098-76-5432',
             fullName: 'Bert Erking'
         })
     })
@@ -59,11 +59,11 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
                     id: 'appId',
                     borrower: {
                         fullName: 'Joe Mama',
-                        taxIdentificationNumber: '123-45-6789'
+                        taxIdentificationIdentifier: '123-45-6789'
                     },
                     coborrower: {
                         fullName: 'Bert Erking',
-                        taxIdentificationNumber: '098-76-5432'
+                        taxIdentificationIdentifier: '098-76-5432'
                     }
                 }
             ]

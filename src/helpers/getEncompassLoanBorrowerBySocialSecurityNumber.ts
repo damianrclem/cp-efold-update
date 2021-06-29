@@ -3,7 +3,7 @@ import { formatAsSocialSecurityNumber } from './formatAsSocialSecurityNumber'
 
 interface Borrower {
     fullName: string
-    taxIdentificationNumber: string
+    taxIdentificationIdentifier: string
     applicationId: string;
 }
 
@@ -38,7 +38,8 @@ const getBorrower = (
     borrowerType: 'borrower' | 'coborrower'
 ): Borrower | undefined => {
     const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
-    const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationNumber === formattedSSN);
+    const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationIdentifier === formattedSSN);
+    console.log('application', applications)
     if (!application) {
         return;
     }
@@ -50,7 +51,7 @@ const getBorrower = (
 
     return {
         fullName: borrower.fullName,
-        taxIdentificationNumber: borrower.taxIdentificationNumber,
+        taxIdentificationIdentifier: borrower.taxIdentificationIdentifier,
         applicationId: application.id
     };
 }
