@@ -48,7 +48,7 @@ functions:
               event:
                 - "Lambda Function Invocation Result - Succeeded"
             resources:
-              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-get-udn-orders"
+              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-getOrders"
 
 resources:
   - ${file(./resources/alarms.yml)}
