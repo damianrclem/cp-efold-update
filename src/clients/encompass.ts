@@ -120,14 +120,14 @@ export const getLoanDocuments = async (loanId: string): Promise<AxiosResponse<an
  * @returns {Promise<AxiosResponse<any>>}
  */
 export const createLoanDocument = async (loanId: string, applicationId: string): Promise<AxiosResponse<any>> => {
-    return await callApi('patch', `/encompass/v3/loans/${loanId}/documents?action=add`, {
+    return await callApi('patch', `/encompass/v3/loans/${loanId}/documents?action=add`, [{
         title: UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE,
         description: UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION,
         application: {
             entityId: applicationId,
             entityType: "Application"
         }
-    });
+    }]);
 }
 
 /**
