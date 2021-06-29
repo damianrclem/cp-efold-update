@@ -1,4 +1,5 @@
 import { LoggerError } from "@revolutionmortgage/rm-logger"
+import { formatAsSocialSecurityNumber } from './formatAsSocialSecurityNumber'
 
 interface Borrower {
     fullName: string
@@ -20,16 +21,8 @@ export class NoLoanApplicationsError extends LoggerError {
 
 export class NoLoanBorrowerWithMatchingSSNError extends LoggerError {
     constructor(data: any) {
-        super('No borrower on the loan matches the specifiec SSN', data)
+        super('No borrower on the loan matches the specified SSN', data)
     }
-}
-
-const formatAsSocialSecurityNumber = (socialSecurityNumber: string): string => {
-    let formattedSSN: string = socialSecurityNumber.replace(/\D/g, '');
-    formattedSSN = formattedSSN.replace(/^(\d{3})/, '$1-');
-    formattedSSN = formattedSSN.replace(/-(\d{2})/, '-$1-');
-    formattedSSN = formattedSSN.replace(/(\d)-(\d{4}).*/, '$1-$2');
-    return formattedSSN;
 }
 
 /**

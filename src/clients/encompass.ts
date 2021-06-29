@@ -19,8 +19,8 @@ export class EncompassClient_MissingAuthTokenError extends LoggerError {
 }
 
 const getBaseUrl = (): string => {
-    const baseUrl = get(process, 'env.ENCOMPASS_BASE_URL');
-    if (!baseUrl) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_BASE_URL');
+    const baseUrl = get(process, 'env.ENCOMPASS_API_BASE_URL');
+    if (!baseUrl) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_API_BASE_URL');
 
     return baseUrl as string;
 }
@@ -83,7 +83,7 @@ const callApi = async (
     const token = await getToken();
     const baseUrl = getBaseUrl();
 
-    const url = `${baseUrl}${endpoint};`
+    const url = `${baseUrl}${endpoint}`;
     return await axios({
         method: method,
         url: url,
