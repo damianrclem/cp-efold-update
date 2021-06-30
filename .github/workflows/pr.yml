@@ -31,7 +31,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: "run unit tests"
-        uses: ./.github/actions/unit-tests
+        uses: ./.github/actions/unit-test
 
   deploy:
     needs: [ build ]
