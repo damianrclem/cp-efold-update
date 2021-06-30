@@ -39,7 +39,6 @@ const getBorrower = (
 ): Borrower | undefined => {
     const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
     const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationIdentifier === formattedSSN);
-    console.log('application', applications)
     if (!application) {
         return;
     }
