@@ -56,7 +56,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: "run integration tests"
-        uses: ./.github/actions/int-tests
+        uses: ./.github/actions/int-test
 
   deploy:
     needs: [ test ]
