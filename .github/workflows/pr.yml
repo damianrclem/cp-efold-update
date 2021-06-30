@@ -15,7 +15,7 @@ env:
 
 jobs:
   build:
-    name: "Build"
+    name: "🛠️ Build"
     
     runs-on: ubuntu-latest
     strategy:
@@ -35,7 +35,7 @@ jobs:
 
   deploy:
     needs: [ build ]
-    name: "Deploy to pr"
+    name: "🚀 Deploy to pr"
 
     runs-on: ubuntu-latest
     strategy:
