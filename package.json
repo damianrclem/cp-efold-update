@@ -7,6 +7,7 @@
     "scripts": {
         "test": "jest -c jest.config.js",
         "test:unit": "jest -c jest.config.unit.js",
+        "test:int": "jest -c jest.config.int.js",
         "start": "sls offline"
     },
     "dependencies": {
