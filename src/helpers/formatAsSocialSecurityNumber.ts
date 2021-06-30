@@ -1,3 +1,8 @@
+/**
+ * Formats a string to an SSN format
+ * @param {string} socialSecurityNumber - The social security number to format
+ * @returns {string}
+ */
 export const formatAsSocialSecurityNumber = (socialSecurityNumber: string): string => {
     let formattedSSN: string = socialSecurityNumber.replace(/\D/g, '');
     formattedSSN = formattedSSN.replace(/^(\d{3})/, '$1-');
