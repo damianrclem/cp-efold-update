@@ -13,6 +13,12 @@ export class InvalidParamsError extends LoggerError {
     }
 }
 
+export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
+    constructor(message: string, data?: any) {
+        super(message, data)
+    }
+}
+
 interface Detail {
     requestPayload: {
         detail: {
@@ -52,14 +58,24 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const loanResponse = await getLoan(loanId);
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
 
-    const loanDocumentsResponse = await getLoanDocuments(loanId);
-    const existingLoanDocument = getLoanDocumentByTitle(loanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+    const existingLoanDocumentsResponse = await getLoanDocuments(loanId);
+    const existingLoanDocument = getLoanDocumentByTitle(existingLoanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+
+    // If there is an existing loan document with the correct title, upload to that document
     if (existingLoanDocument) {
         await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
         return;
     }
 
-    const newLoanDocumentRepsonse = await createLoanDocument(loanId, borrower.applicationId);
-    console.log('new', newLoanDocumentRepsonse)
-    await uploadUDNReportToEFolder(loanId, newLoanDocumentRepsonse.data[0].id, pdf);
+    // If we could not find the document, create the loan document
+    await createLoanDocument(loanId, borrower.applicationId);
+    const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
+    const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+
+    // If we still can't find it, something has gone wrong
+    if (!newLoanDocument) {
+        throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
+    }
+
+    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
 };
