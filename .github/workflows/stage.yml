@@ -46,5 +46,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - uses: Fooji/create-aws-profile-action@v1
+        with:
+          profile: stageAccount
+          region: us-east-2
+          key: ${{ secrets.STAGE_AWS_ACCESS_KEY_ID }}
+          secret: ${{ secrets.STAGE_AWS_SECRET_ACCESS_KEY }}
+
       - name: "deploy"
         uses: ./.github/actions/deploy

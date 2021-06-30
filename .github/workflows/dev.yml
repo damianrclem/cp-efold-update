@@ -55,6 +55,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - uses: Fooji/create-aws-profile-action@v1
+        with:
+          profile: devAccount
+          region: us-east-2
+          key: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          secret: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+
       - name: "run integration tests"
         uses: ./.github/actions/int-test
 
