@@ -3,10 +3,4 @@
  * @param {string} socialSecurityNumber - The social security number to format
  * @returns {string}
  */
-export const formatAsSocialSecurityNumber = (socialSecurityNumber: string): string => {
-    let formattedSSN: string = socialSecurityNumber.replace(/\D/g, '');
-    formattedSSN = formattedSSN.replace(/^(\d{3})/, '$1-');
-    formattedSSN = formattedSSN.replace(/-(\d{2})/, '-$1-');
-    formattedSSN = formattedSSN.replace(/(\d)-(\d{4}).*/, '$1-$2');
-    return formattedSSN;
-}
+export const formatAsSocialSecurityNumber = (socialSecurityNumber: string): string => socialSecurityNumber.replace(/(\d{3})(\d{2})(\d{4})/g, '$1-$2-$3');
