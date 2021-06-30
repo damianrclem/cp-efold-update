@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { handler, InvalidParamsError } from '../../../src/functions/eFolderUDNReportUpload';
+import { handler, InvalidParamsError, LoanDocumentForUDNReportsNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
 import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
@@ -14,8 +14,8 @@ jest.mock("../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber",
     getEncompassLoanBorrowerBySocialSecurityNumber: jest.fn()
 }))
 
-jest.mock("../../../src/helpers/getLoanDocumentByTitleAndBorrowerName", () => ({
-    getLoanDocumentByTitleAndBorrowerName: jest.fn()
+jest.mock("../../../src/helpers/getLoanDocumentByTitle", () => ({
+    getLoanDocumentByTitle: jest.fn()
 }))
 
 jest.mock("../../../src/helpers/uploadUDNReportToEFolder", () => ({
@@ -120,9 +120,7 @@ describe('eFolderUDNReportUpload', () => {
 
         createLoanDocument.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve({
-                data: {
-                    id: '123'
-                }
+                data: ''
             })
         }))
 
@@ -141,5 +139,48 @@ describe('eFolderUDNReportUpload', () => {
                 }
             }
         }, {}, () => { })).resolves.not.toThrowError();
+    });
+
+    test('it does throw an error if no document was found to upload to', async () => {
+        getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
+            resolve({
+                data: {}
+            })
+        }));
+
+        getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
+            application: '123',
+            fullName: 'bert',
+        })
+
+        getLoanDocuments.mockReturnValue(() => new Promise((resolve, reject) => {
+            resolve({
+                data: {}
+            })
+        }))
+
+        createLoanDocument.mockReturnValue(() => new Promise((resolve, reject) => {
+            resolve({
+                data: ''
+            })
+        }))
+
+        getLoanDocumentByTitle.mockReturnValue(undefined);
+
+        await expect(handler({
+            detail: {
+                requestPayload: {
+                    detail: {
+                        LoanId: '123',
+                        SocialSecurityNumber: '123'
+                    }
+                },
+                responsePayload: {
+                    detail: {
+                        pdf: 'i am a pdf'
+                    }
+                }
+            }
+        }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
     });
 });
