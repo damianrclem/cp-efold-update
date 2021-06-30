@@ -39,6 +39,7 @@ jobs:
         uses: ./.github/actions/unit-test
 
   test:
+    needs: [ build ]
     name: "Test"
     
     runs-on: ubuntu-latest
@@ -58,7 +59,7 @@ jobs:
         uses: ./.github/actions/int-tests
 
   deploy:
-    needs: [ build, test ]
+    needs: [ test ]
     name: "Deploy to dev"
 
     runs-on: ubuntu-latest
