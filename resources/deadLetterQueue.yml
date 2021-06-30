@@ -11,7 +11,7 @@ Resources:
       Description: "Dlq"
       Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq-rule
       State: "ENABLED"
-      EventBusName: ${self:custom.eventBusArn}
+      EventBusName: ${self:custom.creditPlusEventBusArn}
       EventPattern:
         detail-type:
           - "Lambda Function Invocation Result - Failure"
@@ -102,7 +102,7 @@ Resources:
                     - ">="
                     - ${self:custom.replayMaxCount}
       RetentionDays: 0 # Keeps events indefinitely
-      SourceArn: "${self:custom.eventBusArn}"
+      SourceArn: "${self:custom.creditPlusEventBusArn}"
 
   DlqAlarmTopic1:
     Type: AWS::SNS::Topic
