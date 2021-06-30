@@ -17,6 +17,7 @@ custom:
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   replayQueueArn: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay"
+  replayMaxCount: 20 # This is when messages quit replaying and go to the DLQ
 
 provider:
   name: aws
