@@ -16,6 +16,7 @@ custom:
     pr: https://elliemae-api-proxy.prrm.io
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
+  replayQueueArn: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay"
 
 provider:
   name: aws
@@ -52,9 +53,26 @@ functions:
                 - "Lambda Function Invocation Result - Succeeded"
             resources:
               - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-getOrders"
+      - eventBridge:
+          eventBus: ${self:custom.creditPlusEventBusArn}
+          pattern:
+            source:
+              - "lambda"
+            detail-type:
+              event:
+                - "Lambda Function Invocation Result - Failure"
+            resources:
+              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+  
+  eFolderUDNReportUploadReplay:
+    handler: src/functions/eFolderUDNReportUploadReplay.handler
+    events:
+      - sqs: ${self:custom.replayQueueArn}
 
 resources:
   - ${file(./resources/alarms.yml)}
+  - ${file(./resources/replayQueue.yml)}
+  - ${file(./resources/deadLetterQueue.yml)}
 
 plugins:
   - serverless-plugin-typescript
