@@ -12,6 +12,11 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
   NPM_TOKEN: ${{ secrets.PUBLISH_NPM_TOKEN }}
+  ENCOMPASS_API_BASE_URL: https://elliemae-api-proxy.devrm.io
+  ENCOMPASS_CLIENT_ID: ${{ secrets.DEV_ENCOMPASS_CLIENT_ID }}
+  ENCOMPASS_CLIENT_SECRET: ${{ secrets.DEV_ENCOMPASS_CLIENT_SECRET }}
+  ENCOMPASS_SMART_CLIENT_USER: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_USER }}
+  ENCOMPASS_SMART_CLIENT_PASSWORD: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_PASSWORD }}
 
 jobs:
   build:
@@ -33,8 +38,27 @@ jobs:
       - name: "run unit tests"
         uses: ./.github/actions/unit-tests
 
+  test:
+    name: "Test"
+    
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: "run integration tests"
+        uses: ./.github/actions/int-tests
+
   deploy:
-    needs: [ build ]
+    needs: [ build, test ]
     name: "Deploy to dev"
 
     runs-on: ubuntu-latest
