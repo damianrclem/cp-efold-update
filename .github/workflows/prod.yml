@@ -27,7 +27,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: "run unit tests"
-        uses: ./.github/actions/unit-tests
+        uses: ./.github/actions/unit-test
 
   deploy:
     needs: [ build ]
@@ -45,6 +45,13 @@ jobs:
         uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - uses: Fooji/create-aws-profile-action@v1
+        with:
+          profile: prodAccount
+          region: us-east-2
+          key: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          secret: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
 
       - name: "deploy"
         uses: ./.github/actions/deploy

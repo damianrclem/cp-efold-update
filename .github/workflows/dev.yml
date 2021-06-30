@@ -12,6 +12,11 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
   SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
   NPM_TOKEN: ${{ secrets.PUBLISH_NPM_TOKEN }}
+  ENCOMPASS_API_BASE_URL: https://elliemae-api-proxy.devrm.io
+  ENCOMPASS_CLIENT_ID: ${{ secrets.DEV_ENCOMPASS_CLIENT_ID }}
+  ENCOMPASS_CLIENT_SECRET: ${{ secrets.DEV_ENCOMPASS_CLIENT_SECRET }}
+  ENCOMPASS_SMART_CLIENT_USER: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_USER }}
+  ENCOMPASS_SMART_CLIENT_PASSWORD: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_PASSWORD }}
 
 jobs:
   build:
@@ -31,10 +36,30 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: "run unit tests"
-        uses: ./.github/actions/unit-tests
+        uses: ./.github/actions/unit-test
+
+  test:
+    needs: [ build ]
+    name: "Test"
+    
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: "run integration tests"
+        uses: ./.github/actions/int-test
 
   deploy:
-    needs: [ build ]
+    needs: [ test ]
     name: "Deploy to dev"
 
     runs-on: ubuntu-latest
@@ -49,6 +74,13 @@ jobs:
         uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ matrix.node-version }}
+
+      - uses: Fooji/create-aws-profile-action@v1
+        with:
+          profile: devAccount
+          region: us-east-2
+          key: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          secret: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
 
       - name: "deploy"
         uses: ./.github/actions/deploy

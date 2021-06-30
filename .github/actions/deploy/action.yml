@@ -7,6 +7,11 @@ runs:
       run: npm install -g serverless
       shell: bash
 
+    - name: yarn install
+      run: |
+        yarn install
+      shell: bash
+
     - name: serverless deploy
       run: |
         serverless deploy --stage=${ENV}
