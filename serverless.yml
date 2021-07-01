@@ -60,10 +60,15 @@ functions:
             source:
               - "lambda"
             detail-type:
+              - "Loan"
+            detail:
               event:
                 - "Lambda Function Invocation Result - Failure"
             resources:
               - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+    destinations:
+      onSuccess: ${self:custom.creditPlusEventBusArn}
+      onFailure: ${self:custom.creditPlusEventBusArn}
   
   eFolderUDNReportUploadReplay:
     handler: src/functions/eFolderUDNReportUploadReplay.handler
