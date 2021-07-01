@@ -1,5 +1,5 @@
 import { SQSHandler, SQSEvent, SQSRecord } from 'aws-lambda';
-import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput } from '@aws-sdk/client-eventbridge';
+import { EventBridgeClient, PutEventsCommand, PutEventsCommandOutput, PutEventsRequestEntry } from '@aws-sdk/client-eventbridge';
 import get from 'lodash/get';
 
 /**
@@ -8,7 +8,6 @@ import get from 'lodash/get';
  * @returns {Promise<void>}
  */
 export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
-
     const region = get(process, 'env.REGION');
     if (!region) throw new Error('Environment missing region');
 
@@ -19,7 +18,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
 
     const records = get(event, 'Records') ?? [];
 
-    records.forEach((record: SQSRecord) => {
+    const entries: Array<PutEventsRequestEntry> = records.map((record: SQSRecord): PutEventsRequestEntry => {
         const body = get(record, 'body') ?? '{}';
         const event = JSON.parse(body);
 
@@ -35,23 +34,21 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
         // Grab it, incrememnt it
         const retries = (get(detail, 'retries') ?? 0) + 1;
 
-        const client = new EventBridgeClient({
-            region,
-        });
-        events.push(client.send(new PutEventsCommand({
-            Entries: [
-                {
-                    Detail: JSON.stringify(Object.assign({}, detail, {
-                        retries,
-                    })),
-                    DetailType: detailType,
-                    EventBusName: eventBus,
-                    Source: source,
-                },
-            ],
-        })));
+        return {
+            Detail: JSON.stringify(Object.assign({}, detail, {
+                retries,
+            })),
+            DetailType: detailType,
+            EventBusName: eventBus,
+            Source: source
+        }
     });
 
-    await Promise.all(events);
+    const client = new EventBridgeClient({
+        region,
+    });
 
+    events.push(client.send(new PutEventsCommand({
+        Entries: entries,
+    })))
 };
