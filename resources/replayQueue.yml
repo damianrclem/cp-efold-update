@@ -28,7 +28,6 @@ Resources:
                 - numeric:
                   - "<"
                   - ${self:custom.replayMaxCount}
-      RoleArn: !GetAtt ReplayQueue1Rule1Role.Arn
       Targets:
         - Arn: !GetAtt ReplayQueue1.Arn
           Id: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-queue
@@ -59,37 +58,10 @@ Resources:
             detail:
               retries:
                 - exists: true
-      RoleArn: !GetAtt ReplayQueue1Rule1Role.Arn
       Targets:
         - Arn: !GetAtt ReplayQueue1.Arn
           Id: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-archive
           InputPath: "$.detail.requestPayload"
-
-  ReplayQueue1Rule1Policy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyDocument:
-        Statement:
-        - Action: sqs:*
-          Effect: Allow
-          Resource: !GetAtt ReplayQueue1.Arn
-        Version: '2012-10-17'
-      PolicyName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-rule
-      Roles:
-      - Ref: ReplayQueue1Rule1Role
-
-  ReplayQueue1Rule1Role:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: sts:AssumeRole
-          Effect: Allow
-          Principal:
-            Service:
-            - events.amazonaws.com
-            - sqs.amazonaws.com
-        Version: '2012-10-17'
 
   ReplayQueue1Policy:
     DependsOn:
