@@ -25,12 +25,20 @@ const getBaseUrl = (): string => {
     return baseUrl as string;
 }
 
+const getApiKey = (): string => {
+    const apiKey = get(process, 'env.ENCOMPASS_API_KEY');
+    if (!apiKey) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_API_KEY');
+
+    return apiKey as string;
+}
+
 /**
  * Retrieves OAuth Bearer token from Encompass API
  * @returns {Promise<string>}
  */
 const getToken = async (): Promise<string> => {
     const baseUrl = getBaseUrl();
+    const apiKey = getApiKey();
 
     const smartClientUser = get(process, 'env.ENCOMPASS_SMART_CLIENT_USER');
     if (!smartClientUser) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_SMART_CLIENT_USER');
@@ -57,6 +65,7 @@ const getToken = async (): Promise<string> => {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'x-rm-client': RM_CLIENT,
+            'x-api-key': apiKey,
         },
     });
 
@@ -82,6 +91,7 @@ const callApi = async (
 ): Promise<AxiosResponse<any>> => {
     const token = await getToken();
     const baseUrl = getBaseUrl();
+    const apiKey = getApiKey();
 
     const url = `${baseUrl}${endpoint}`;
     return await axios({
@@ -91,6 +101,7 @@ const callApi = async (
         headers: {
             'x-rm-client': RM_CLIENT,
             'Authorization': `Bearer ${token}`,
+            'x-api-key': apiKey,
         }
     });
 }
