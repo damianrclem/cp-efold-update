@@ -28,11 +28,12 @@ provider:
   environment:
     REGEN_CF_VARS: v1 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
-    ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:id}}"
-    ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:secret}}"
-    ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:user}}"
-    ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:password}}"
-    ENCOMPASS_API_KEY: !Sub "{{resolve:secretsmanager:EllieMaeApiProxySecrets:SecretString:cpEfolderUploadApiKey}}"
+    ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientId}}"
+    ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientSecret}}"
+    ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassUser}}"
+    ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassPassword}}"
+    ENCOMPASS_INSTANCE: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassInstance}}"
+    ENCOMPASS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassApiKey}}"
 
 functions:
   eFolderUDNReportUpload:
