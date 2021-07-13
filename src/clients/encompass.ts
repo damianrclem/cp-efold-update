@@ -52,12 +52,15 @@ const getToken = async (): Promise<string> => {
     const clientSecret = get(process, 'env.ENCOMPASS_CLIENT_SECRET');
     if (!clientSecret) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_CLIENT_SECRET');
 
+    const instance = get(process, 'env.ENCOMPASS_INSTANCE');
+    if (!instance) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_INSTANCE');
+
     const response = await axios({
         method: 'post',
         url: `${baseUrl}/oauth2/v1/token`,
         data: qs.stringify({
             grant_type: 'password',
-            username: `${smartClientUser}@encompass:be11207045`,
+            username: `${smartClientUser}@encompass:${instance}`,
             password: smartClientPassword,
             client_id: clientId,
             client_secret: clientSecret,
