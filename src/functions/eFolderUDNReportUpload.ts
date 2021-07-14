@@ -40,48 +40,42 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
-    try {
-        const loanId = get(event, 'detail.requestPayload.detail.LoanId');
-        if (!loanId) {
-            throw new InvalidParamsError("LoanId missing on request payload", event);
-        }
-
-        const socialSecurityNumber = get(event, 'detail.requestPayload.detail.SocialSecurityNumber');
-        if (!socialSecurityNumber) {
-            throw new InvalidParamsError("SocialSecurityNumber missing on request payload");
-        }
-
-        const pdf = get(event, 'detail.responsePayload.detail.pdf');
-        if (!pdf) {
-            throw new InvalidParamsError("pdf missing on response payload", event);
-        }
-
-        const loanResponse = await getLoan(loanId);
-        const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
-
-        const existingLoanDocumentsResponse = await getLoanDocuments(loanId);
-        const existingLoanDocument = getLoanDocumentByTitle(existingLoanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
-
-        // If there is an existing loan document with the correct title, upload to that document
-        if (existingLoanDocument) {
-            await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
-            return;
-        }
-
-        // If we could not find the document, create the loan document
-        await createLoanDocument(loanId, borrower.applicationId);
-        const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
-        const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
-
-        // If we still can't find it, something has gone wrong
-        if (!newLoanDocument) {
-            throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
-        }
-
-        await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
+    const loanId = get(event, 'detail.requestPayload.detail.LoanId');
+    if (!loanId) {
+        throw new InvalidParamsError("LoanId missing on request payload", event);
     }
-    catch (error) {
-        console.error(error)
-        throw error;
+
+    const socialSecurityNumber = get(event, 'detail.requestPayload.detail.SocialSecurityNumber');
+    if (!socialSecurityNumber) {
+        throw new InvalidParamsError("SocialSecurityNumber missing on request payload");
     }
+
+    const pdf = get(event, 'detail.responsePayload.detail.pdf');
+    if (!pdf) {
+        throw new InvalidParamsError("pdf missing on response payload", event);
+    }
+
+    const loanResponse = await getLoan(loanId);
+    const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
+
+    const existingLoanDocumentsResponse = await getLoanDocuments(loanId);
+    const existingLoanDocument = getLoanDocumentByTitle(existingLoanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+
+    // If there is an existing loan document with the correct title, upload to that document
+    if (existingLoanDocument) {
+        await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
+        return;
+    }
+
+    // If we could not find the document, create the loan document
+    await createLoanDocument(loanId, borrower.applicationId);
+    const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
+    const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+
+    // If we still can't find it, something has gone wrong
+    if (!newLoanDocument) {
+        throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
+    }
+
+    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
 };
