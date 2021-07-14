@@ -40,6 +40,8 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
+    try {
+        
     const loanId = get(event, 'detail.requestPayload.detail.LoanId');
     if (!loanId) {
         throw new InvalidParamsError("LoanId missing on request payload", event);
@@ -78,4 +80,9 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     }
 
     await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
+    } catch (error) {
+        console.error(error);
+
+        throw error;
+    }
 };
