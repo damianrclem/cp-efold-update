@@ -11,8 +11,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 "requestPayload": {
                     "detail": {
-                        "LoanId": "de063fe1-7587-4bdd-b8bd-8db53791cf63",
-                        "SocialSecurityNumber": "222554578"
+                        "LoanId": "85f30ba1-74d6-431b-8655-73c22991ad40",
+                        "SocialSecurityNumber": "11122333"
                     }
                 },
                 "responsePayload": {
