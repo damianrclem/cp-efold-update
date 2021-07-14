@@ -176,8 +176,6 @@ export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: st
 export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer): Promise<AxiosResponse<any>> => {
     const token = await getToken();
 
-    console.log(`token: ${token}`);
-
     return await axios.put(uploadAttachmentUrl, file, {
         headers: {
             'Authorization': `Bearer ${token}`
