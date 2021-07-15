@@ -174,7 +174,7 @@ export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: st
  * @returns {Promise<AxiosResponse<any>>}
  */
 export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer): Promise<AxiosResponse<any>> => {
-    const token = getToken();
+    const token = await getToken();
 
     return await axios.put(uploadAttachmentUrl, file, {
         headers: {
