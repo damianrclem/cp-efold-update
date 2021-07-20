@@ -19,6 +19,55 @@ export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     }
 }
 
+interface EventParams {
+    vendorOrderIdentifier: string;
+    firstName: string;
+    lastName: string;
+    socialSecurityNumber: string;
+    loanId: string;
+}
+
+/**
+ * This will get the required params for the lambda to execute.
+ * If not, an InvalidParamsError will be thrown
+ * @param {Event} event - The event to verify
+ * @returns {EventParams} - the event params required to fulfill the lambda execution
+ */
+const getEventParams = (event: Event): EventParams => {
+    const loanId = get(event, 'detail.requestPayload.detail.LoanId');
+    if (!loanId) {
+        throw new InvalidParamsError("LoanId missing on request payload", event);
+    }
+
+    const vendorOrderIdentifier = get(event, 'detail.responsePayload.vendorOrderIdentifier');
+    if (!vendorOrderIdentifier) {
+        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+    }
+
+    const firstName = get(event, 'detail.responsePayload.firstName');
+    if (!firstName) {
+        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+    }
+
+    const lastName = get(event, 'detail.responsePayload.lastName');
+    if (!lastName) {
+        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+    }
+
+    const socialSecurityNumber = get(event, 'detail.responsePayload.socialSecurityNumber');
+    if (!socialSecurityNumber) {
+        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+    }
+
+    return {
+        loanId,
+        firstName,
+        lastName,
+        socialSecurityNumber,
+        vendorOrderIdentifier
+    }
+} 
+
 interface Detail {
     requestPayload: {
         detail: {
@@ -26,9 +75,14 @@ interface Detail {
         }
     };
     responsePayload: {
-        pdf: string;
+        vendorOrderIdentifier: string;
+        firstName: string;
+        lastName: string;
+        socialSecurityNumber: string;
+        notificationsCount: number;
     };
 }
+
 
 type EVENT_TYPE = 'Loan';
 type Handler = EventBridgeHandler<EVENT_TYPE, Detail, void>;
@@ -40,20 +94,13 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
-    const loanId = get(event, 'detail.requestPayload.detail.LoanId');
-    if (!loanId) {
-        throw new InvalidParamsError("LoanId missing on request payload", event);
-    }
-
-    const socialSecurityNumber = get(event, 'detail.requestPayload.detail.SocialSecurityNumber');
-    if (!socialSecurityNumber) {
-        throw new InvalidParamsError("SocialSecurityNumber missing on request payload");
-    }
-
-    const pdf = get(event, 'detail.responsePayload.detail.pdf');
-    if (!pdf) {
-        throw new InvalidParamsError("pdf missing on response payload", event);
-    }
+    const {
+        loanId,
+        firstName,
+        lastName,
+        socialSecurityNumber,
+        vendorOrderIdentifier
+    } = getEventParams(event)
 
     const loanResponse = await getLoan(loanId);
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
@@ -63,7 +110,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
 
     // If there is an existing loan document with the correct title, upload to that document
     if (existingLoanDocument) {
-        await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
+        await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, "");
         return;
     }
 
@@ -77,5 +124,5 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
     }
 
-    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
+    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, "");
 };
