@@ -184,7 +184,8 @@ export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer
 
     return await axios.put(uploadAttachmentUrl, file, {
         headers: {
-            'Authorization': authorizationValue
+            'Authorization': authorizationValue,
+            'Content-Type': "application/pdf"
         }
     });
 }
