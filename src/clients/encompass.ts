@@ -173,12 +173,19 @@ export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: st
  * @param {Buffer} file - The file you want to upload
  * @returns {Promise<AxiosResponse<any>>}
  */
-export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
+export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer, authorizationHeader?: string): Promise<AxiosResponse<any>> => {
+    let authorizationValue: string;
+    if (authorizationHeader) {
+        authorizationValue = authorizationHeader;
+    } else {
+        const token = await getToken();
+        authorizationValue = `Bearer ${token}`;
+    }
 
     return await axios.put(uploadAttachmentUrl, file, {
         headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': authorizationValue,
+            'Content-Type': "application/pdf"
         }
     });
 }

@@ -14,5 +14,5 @@ export const uploadUDNReportToEFolder = async (loanId: string, loanDocumentId: s
     const loanAttachementUrlResponse = await createLoanAttachmentUrl(loanId, loanDocumentId, fileSize, 'Credit Report');
     const { data } = loanAttachementUrlResponse;
 
-    await uploadAttachment(data.uploadUrl, file);
+    await uploadAttachment(data.uploadUrl, file, data.authorizationHeader);
 }
