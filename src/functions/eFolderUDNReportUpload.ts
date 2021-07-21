@@ -143,7 +143,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
 
     // If there is an existing loan document with the correct title, upload to that document
     if (existingLoanDocument) {
-        await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, "");
+        await uploadUDNReportToEFolder(loanId, existingLoanDocument.id, pdf);
         return;
     }
 
@@ -157,7 +157,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
     }
 
-    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, "");
+    await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
 
     // Now that we have finished uploading, save the updated notifications count to the database.
     await putItem({
