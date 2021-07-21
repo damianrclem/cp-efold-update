@@ -2,6 +2,7 @@ import { LoggerError } from '@revolutionmortgage/rm-logger';
 import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
+import { getItem, putItem } from '../common/database';
 import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
 import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
@@ -25,6 +26,7 @@ interface EventParams {
     lastName: string;
     socialSecurityNumber: string;
     loanId: string;
+    notificationsCount: number;
 }
 
 /**
@@ -59,12 +61,18 @@ const getEventParams = (event: Event): EventParams => {
         throw new InvalidParamsError("socialSecurityNumber missing on request payload");
     }
 
+    const notificationsCount = get(event, 'detail.responsePayload.notificationsCount');
+    if (!notificationsCount) {
+        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+    }
+
     return {
         loanId,
         firstName,
         lastName,
         socialSecurityNumber,
-        vendorOrderIdentifier
+        vendorOrderIdentifier,
+        notificationsCount
     }
 } 
 
@@ -99,8 +107,22 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         firstName,
         lastName,
         socialSecurityNumber,
-        vendorOrderIdentifier
+        vendorOrderIdentifier,
+        notificationsCount
     } = getEventParams(event)
+
+    // Find the UDN order we have saved to compare the notifications count
+    const { Item } = await getItem({
+        PK: `ORDER#${vendorOrderIdentifier}`,
+        SK: `SSN#${socialSecurityNumber}`
+    });
+
+    // If we have an order saved in the database, compare it's notifications count
+    // with the notifications count from the event payload. If the event payload and the count
+    // in the database matches, we don't need to upload.
+    if (Item && notificationsCount === Item.NotificationsCount) {
+        return;
+    }
 
     const loanResponse = await getLoan(loanId);
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
@@ -125,4 +147,13 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     }
 
     await uploadUDNReportToEFolder(loanId, newLoanDocument.id, "");
+
+    // Now that we have finished uploading, save the updated notifications count to the database.
+    await putItem({
+        PK: `ORDER#${vendorOrderIdentifier}`,
+        SK: `SSN#${socialSecurityNumber}`,
+        OrderId: vendorOrderIdentifier,
+        SocialSecurityNumber: socialSecurityNumber,
+        NotificationsCount: notificationsCount
+    })
 };

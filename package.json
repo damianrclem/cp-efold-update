@@ -11,6 +11,8 @@
         "start": "sls offline"
     },
     "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.22.0",
+        "@aws-sdk/lib-dynamodb": "^3.22.0",
         "@revolutionmortgage/rm-logger": "^0.0.14",
         "axios": "^0.21.1",
         "lodash": "^4.17.21",
