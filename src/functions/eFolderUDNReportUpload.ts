@@ -39,17 +39,17 @@ interface EventParams {
 const getEventParams = (event: Event): EventParams => {
     const loanId = get(event, 'detail.requestPayload.detail.LoanId');
     if (!loanId) {
-        throw new InvalidParamsError("LoanId missing on request payload", event);
+        throw new InvalidParamsError("loanId missing on request payload", event);
     }
 
     const vendorOrderIdentifier = get(event, 'detail.responsePayload.vendorOrderIdentifier');
     if (!vendorOrderIdentifier) {
-        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+        throw new InvalidParamsError("vendorOrderIdentifier missing on request payload");
     }
 
     const firstName = get(event, 'detail.responsePayload.firstName');
     if (!firstName) {
-        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+        throw new InvalidParamsError("firstName missing on request payload");
     }
 
     const lastName = get(event, 'detail.responsePayload.lastName');
@@ -152,6 +152,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
     const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
 
+    console.log(newLoanDocument)
     // If we still can't find it, something has gone wrong
     if (!newLoanDocument) {
         throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
