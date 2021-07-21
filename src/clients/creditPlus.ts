@@ -78,13 +78,16 @@ interface GetUDNOrderParams {
     lastName: string
     socialSecurityNumber: string
     vendorOrderIdentifier: string
-
 }
 
 /**
  * Get a UDN order
  * @param {GetUDNOrderParams} params - the data needed to get a udn order
- * @returns {Promise<AxiosResponse<any>>} - the response from the api
+ * @param {string} params.firstName The first name on the UDN order
+ * @param {string} params.lastName The last name on the UDN order
+ * @param {string} params.socialSecurityNumber The social security number on the UDN order
+ * @param {string} params.vendorOrderIdentifier The UDN order id
+ * @returns {Promise<AxiosResponse<any>>} the response from the api
  */
 export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosResponse<any>> => {
     const url = getUrl();
