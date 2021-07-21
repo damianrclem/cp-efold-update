@@ -3,9 +3,10 @@ import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
 import { getItem, putItem } from '../common/database';
-import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
+import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
 import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
+import getUDNReport from '../helpers/getUDNReport';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 
 export class InvalidParamsError extends LoggerError {
@@ -124,6 +125,16 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         return;
     }
 
+    // Notifications count didn't match. We have an alert that needs uploaded.
+    // Get the pdf report to upload
+    const pdf = await getUDNReport({
+        firstName,
+        lastName,
+        socialSecurityNumber,
+        vendorOrderIdentifier
+    })
+
+    // Get the loan borrower information
     const loanResponse = await getLoan(loanId);
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
 
@@ -155,5 +166,5 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         OrderId: vendorOrderIdentifier,
         SocialSecurityNumber: socialSecurityNumber,
         NotificationsCount: notificationsCount
-    })
+    });
 };

@@ -36,3 +36,5 @@ const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
 
     return pdf;
 }
+
+export default getUDNReport;
