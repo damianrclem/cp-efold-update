@@ -26,7 +26,6 @@ interface GetUDNReportParams {
  */
 export const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
     const response = await getUDNOrder(params);
-    console.log(response)
     const parsedResponseAsJson = JSON.parse(xml2json(response.data, { compact: true }));
 
     const pdf = jsonpath.query(parsedResponseAsJson, '$..EmbeddedContentXML._text')[0] ?? null;

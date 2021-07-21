@@ -3,6 +3,8 @@ import { handler, InvalidParamsError, LoanDocumentForUDNReportsNotFoundError } f
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
 import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
+import { getUDNReport } from "../../../src/helpers/getUDNReport";
+import { getItem, putItem } from '../../../src/common/database';
 
 jest.mock('../../../src/clients/encompass', () => ({
     getLoan: jest.fn(),
@@ -20,6 +22,15 @@ jest.mock("../../../src/helpers/getLoanDocumentByTitle", () => ({
 
 jest.mock("../../../src/helpers/uploadUDNReportToEFolder", () => ({
     uploadUDNReportToEFolder: jest.fn()
+}))
+
+jest.mock("../../../src/helpers/getUDNReport", () => ({
+    getUDNReport: jest.fn()
+}))
+
+jest.mock("../../../src/common/database", () => ({
+    getItem: jest.fn(),
+    putItem: jest.fn(),
 }))
 
 describe('eFolderUDNReportUpload', () => {
@@ -83,18 +94,29 @@ describe('eFolderUDNReportUpload', () => {
             id: 'hey yo'
         })
 
+        getItem.mockReturnValue(() => new Promise((resolve) => {
+            resolve({
+                Item: {}
+            })
+        }));
+
+        getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
+            resolve('I am a pdf')
+        }))
+
         await expect(handler({
             detail: {
                 requestPayload: {
                     detail: {
                         LoanId: '123',
-                        SocialSecurityNumber: '123'
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        pdf: 'i am a pdf'
-                    }
+                    firstName: 'Lord',
+                    lastName: 'McMuffin',
+                    vendorOrderIdentifier: '23',
+                    socialSecurityNumber: '123',
+                    notificationsCount: 1
                 }
             }
         }, {}, () => { })).resolves.not.toThrowError();

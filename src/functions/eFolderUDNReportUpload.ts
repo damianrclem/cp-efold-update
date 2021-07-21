@@ -6,7 +6,7 @@ import { getItem, putItem } from '../common/database';
 import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
 import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
-import getUDNReport from '../helpers/getUDNReport';
+import { getUDNReport } from '../helpers/getUDNReport';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 
 export class InvalidParamsError extends LoggerError {
@@ -54,7 +54,7 @@ const getEventParams = (event: Event): EventParams => {
 
     const lastName = get(event, 'detail.responsePayload.lastName');
     if (!lastName) {
-        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+        throw new InvalidParamsError("lastName missing on request payload");
     }
 
     const socialSecurityNumber = get(event, 'detail.responsePayload.socialSecurityNumber');
@@ -64,7 +64,7 @@ const getEventParams = (event: Event): EventParams => {
 
     const notificationsCount = get(event, 'detail.responsePayload.notificationsCount');
     if (!notificationsCount) {
-        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
+        throw new InvalidParamsError("notificationsCount missing on request payload");
     }
 
     return {
