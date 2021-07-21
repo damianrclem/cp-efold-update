@@ -24,8 +24,9 @@ interface GetUDNReportParams {
  * @param {string} params.vendorOrderIdentifier The UDN order id
  * @returns {Promise<string>} - The base64 encdoed pdf udn report
  */
-const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
+export const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
     const response = await getUDNOrder(params);
+    console.log(response)
     const parsedResponseAsJson = JSON.parse(xml2json(response.data, { compact: true }));
 
     const pdf = jsonpath.query(parsedResponseAsJson, '$..EmbeddedContentXML._text')[0] ?? null;
@@ -36,5 +37,3 @@ const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
 
     return pdf;
 }
-
-export default getUDNReport;
