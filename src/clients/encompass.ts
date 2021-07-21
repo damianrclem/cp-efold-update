@@ -3,8 +3,7 @@ import qs from 'qs';
 import { LoggerError } from '@revolutionmortgage/rm-logger';
 import axios, { AxiosResponse, Method } from 'axios';
 import { UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
-
-const RM_CLIENT = 'cp-efolder-upload';
+import { RM_CLIENT } from '../common/constants';
 
 export class EncompassClient_EnvironmentConfigurationError extends LoggerError {
     constructor(message: string, data?: any) {

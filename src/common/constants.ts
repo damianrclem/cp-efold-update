@@ -1,0 +1,1 @@
+export const RM_CLIENT = 'cp-efolder-upload';
