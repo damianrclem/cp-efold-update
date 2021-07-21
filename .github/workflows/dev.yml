@@ -23,6 +23,7 @@ env:
   CREDIT_PLUS_API_KEY: ${{ secrets.DEV_CREDIT_PLUS_API_KEY }}
   CREDIT_PLUS_API_USERNAME: ${{ secrets.CREDIT_PLUS_API_USERNAME }}
   CREDIT_PLUS_API_PASSWORD: ${{ secrets.CREDIT_PLUS_API_PASSWORD }}
+  TABLE_NAME: dev-cp-efolder-upload
 
 jobs:
   build:
