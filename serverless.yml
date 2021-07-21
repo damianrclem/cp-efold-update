@@ -19,6 +19,11 @@ custom:
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
   cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
+  creditPlustApiBaseUrl:
+    prod: https://creditplus-api-proxy.rmtg.io
+    stage: https://creditplus-api-proxy.stagerm.io
+    dev: https://creditplus-api-proxy.devrm.io
+    pr: https://creditplus-api-proxy.prrm.io
 
 provider:
   name: aws
@@ -37,6 +42,10 @@ provider:
     ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassPassword}}"
     ENCOMPASS_INSTANCE: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassInstance}}"
     ENCOMPASS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassApiKey}}"
+    CREDIT_PLUS_API_BASE_URL: ${self:custom.creditPlusApiBaseUrl.${self:custom.stage}}
+    CREDIT_PLUS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiKey}}"
+    CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
+    CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
 
 functions:
   eFolderUDNReportUpload:
