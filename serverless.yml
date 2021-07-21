@@ -14,8 +14,11 @@ custom:
     stage: https://elliemae-api-proxy.stagerm.io
     dev: https://elliemae-api-proxy.devrm.io
     pr: https://elliemae-api-proxy.prrm.io
+  tableName: ${self:custom.stage}-${self:service}
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
+  cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
+  cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
 
 provider:
   name: aws
@@ -55,6 +58,7 @@ functions:
 
 resources:
   - ${file(./resources/alarms.yml)}
+  - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
 
 plugins:
   - serverless-plugin-typescript
