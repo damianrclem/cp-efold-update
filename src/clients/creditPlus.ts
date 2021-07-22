@@ -177,7 +177,7 @@ export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosRespo
 	</DEAL_SETS>
 </MESSAGE>`;
 
-    const response = await axios.post(url, xmls, headers);
+    const response = await axios.post(url, xmls, { headers });
     return response;
 }
 
