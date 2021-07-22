@@ -21,13 +21,14 @@ export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     }
 }
 
+export class LoanNotFoundError extends LoggerError {
+    constructor(loanId: string) {
+        super(`Loan with id: ${loanId} not found`)
+    }
+}
+
 interface EventParams {
-    vendorOrderIdentifier: string;
-    firstName: string;
-    lastName: string;
-    socialSecurityNumber: string;
     loanId: string;
-    notificationsCount: number;
 }
 
 /**
@@ -42,38 +43,8 @@ const getEventParams = (event: Event): EventParams => {
         throw new InvalidParamsError("loanId missing on request payload", event);
     }
 
-    const vendorOrderIdentifier = get(event, 'detail.responsePayload.vendorOrderIdentifier');
-    if (!vendorOrderIdentifier) {
-        throw new InvalidParamsError("vendorOrderIdentifier missing on request payload");
-    }
-
-    const firstName = get(event, 'detail.responsePayload.firstName');
-    if (!firstName) {
-        throw new InvalidParamsError("firstName missing on request payload");
-    }
-
-    const lastName = get(event, 'detail.responsePayload.lastName');
-    if (!lastName) {
-        throw new InvalidParamsError("lastName missing on request payload");
-    }
-
-    const socialSecurityNumber = get(event, 'detail.responsePayload.socialSecurityNumber');
-    if (!socialSecurityNumber) {
-        throw new InvalidParamsError("socialSecurityNumber missing on request payload");
-    }
-
-    const notificationsCount = get(event, 'detail.responsePayload.notificationsCount');
-    if (!notificationsCount) {
-        throw new InvalidParamsError("notificationsCount missing on request payload");
-    }
-
     return {
         loanId,
-        firstName,
-        lastName,
-        socialSecurityNumber,
-        vendorOrderIdentifier,
-        notificationsCount
     }
 } 
 
@@ -83,13 +54,7 @@ interface Detail {
             LoanId: string;
         }
     };
-    responsePayload: {
-        vendorOrderIdentifier: string;
-        firstName: string;
-        lastName: string;
-        socialSecurityNumber: string;
-        notificationsCount: number;
-    };
+    responsePayload: EventParams;
 }
 
 
@@ -105,27 +70,62 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 export const handler: Handler = async (event: Event): Promise<void> => {
     const {
         loanId,
-        firstName,
-        lastName,
-        socialSecurityNumber,
-        vendorOrderIdentifier,
-        notificationsCount
     } = getEventParams(event)
 
-    // Find the UDN order we have saved to compare the notifications count
+    // Get the loan from the database
     const result = await getItem({
-        PK: `ORDER#${vendorOrderIdentifier}`,
-        SK: `SSN#${socialSecurityNumber}`
+        PK: `LOAN#${loanId}`,
+        SK: `LOAN#${loanId}`
     });
 
-    // If we have an order saved in the database, compare it's notifications count
-    // with the notifications count from the event payload. If the event payload and the count
-    // in the database matches, we don't need to upload.
-    if (result && result.Item && notificationsCount === result.Item.NotificationsCount) {
-        return;
+    // If we can't find it, throw an error.
+    if (!result || !result.Item) {
+        throw new LoanNotFoundError(loanId);
     }
 
-    // Notifications count didn't match. We have an alert that needs uploaded.
+    const {
+        BorrowerFirstName,
+        BorrowerLastName,
+        BorrowerSSN,
+        CoborrowerFirstName,
+        CoborrowerLastName,
+        CoborrowerSSN,
+        VendorOrderIdentifier,
+    } = result.Item;
+
+    // Create a list of upload requests to make to encompass, starting with the borrower
+    const uploadRequests: Array<Promise<void>> = [
+        uploadUDNReportForBorrower({
+            loanId,
+            firstName: BorrowerFirstName,
+            lastName: BorrowerLastName,
+            socialSecurityNumber: BorrowerSSN,
+            vendorOrderIdentifier: VendorOrderIdentifier
+        })
+    ];
+
+    // If we have a coborrower, add it to the list of requests
+    if (CoborrowerFirstName && CoborrowerLastName && CoborrowerSSN) {
+        uploadRequests.push(uploadUDNReportForBorrower({
+            loanId,
+            firstName: CoborrowerFirstName,
+            lastName: CoborrowerLastName,
+            socialSecurityNumber: CoborrowerSSN,
+            vendorOrderIdentifier: VendorOrderIdentifier
+        }))
+    }
+    
+    // Fire all requests
+    await Promise.all(uploadRequests);
+};
+
+const uploadUDNReportForBorrower = async ({
+    firstName,
+    lastName,
+    socialSecurityNumber,
+    vendorOrderIdentifier,
+    loanId,
+}): Promise<void> => {
     // Get the pdf report to upload
     const pdf = await getUDNReport({
         firstName,
@@ -152,20 +152,10 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
     const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
 
-    console.log(newLoanDocument)
     // If we still can't find it, something has gone wrong
     if (!newLoanDocument) {
         throw new LoanDocumentForUDNReportsNotFoundError(`No documents for loan ${loanId} was found for UDN reports`, newLoanDocumentsRepsonse)
     }
 
     await uploadUDNReportToEFolder(loanId, newLoanDocument.id, pdf);
-
-    // Now that we have finished uploading, save the updated notifications count to the database.
-    await putItem({
-        PK: `ORDER#${vendorOrderIdentifier}`,
-        SK: `SSN#${socialSecurityNumber}`,
-        OrderId: vendorOrderIdentifier,
-        SocialSecurityNumber: socialSecurityNumber,
-        NotificationsCount: notificationsCount
-    });
-};
+}
