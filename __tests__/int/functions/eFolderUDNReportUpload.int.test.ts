@@ -6,34 +6,25 @@ import { createLoan, deleteLoan } from "../encompassTestClient";
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
-    const testSNN = "799684724";
-    let loanId: string;
-
-    beforeEach(async () => {
+    test('it does not blow up', async () => {
+        const SSN = "799684724";
         const createLoanResponse = await createLoan({
-            TaxIdentificationNumber: testSNN,
+            TaxIdentificationNumber: SSN,
         });
         const { id } = createLoanResponse.data;
-        loanId = id;
-    })
 
-    afterEach(async () => {
-        await deleteLoan(loanId);
-    })
-
-    test('it does not blow up', async () => {
         // Don't worry, this is a fake/test loan in Encompass.
         const event = {
             detail: {
                 "requestPayload": {
                     "detail": {
-                        "LoanId": loanId,
+                        "LoanId": id,
                     }
                 },
                 "responsePayload": {
                     "firstName": "Christopher",
                     "lastName": "Gzpygzkx",
-                    "socialSecurityNumber": "799684724",
+                    "socialSecurityNumber": SSN,
                     "vendorOrderIdentifier": "884",
                     "notificationsCount": 1,
                 }
@@ -41,5 +32,7 @@ describe('eFolderUDNReportUpload', () => {
         }
 
         await expect(handler(event, {}, () => { })).resolves.not.toThrow();
+
+        await deleteLoan(id);
     }, testTimeout)
 })
