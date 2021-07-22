@@ -95,14 +95,14 @@ const request = async (method: Method, url: string, data?: any) => {
     });
 }
 
-export const createLoan = async (): Promise<AxiosResponse<any>> => {
+export const createLoan = async (borrowerData?: { [key: string]: any}): Promise<AxiosResponse<any>> => {
     return await request("POST", "/encompass/v3/loans?loanFolder=Testing&view=id", {
             applications: [
                 {
                     borrower: {
                         FirstName: new Date().toDateString(),
                         LastName: 'Integration Test',
-                        TaxIdentificationIdentifier: "799684724"
+                        ...borrowerData
                     },
                 },
             ]
