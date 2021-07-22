@@ -113,7 +113,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     } = getEventParams(event)
 
     // Find the UDN order we have saved to compare the notifications count
-    const { Item } = await getItem({
+    const result = await getItem({
         PK: `ORDER#${vendorOrderIdentifier}`,
         SK: `SSN#${socialSecurityNumber}`
     });
@@ -121,7 +121,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     // If we have an order saved in the database, compare it's notifications count
     // with the notifications count from the event payload. If the event payload and the count
     // in the database matches, we don't need to upload.
-    if (Item && notificationsCount === Item.NotificationsCount) {
+    if (result && result.Item && notificationsCount === result.Item.NotificationsCount) {
         return;
     }
 
