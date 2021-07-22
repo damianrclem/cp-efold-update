@@ -54,3 +54,20 @@ export const putItem = async (item: {
     Item: item,
   })
 }
+
+/**
+ * Puts an item into dynamodb
+ * @param {Object} key - The key of the item to delete in dynamodb
+ * @returns {Promise<void>}
+ */
+export const deleteItem = async (key: {
+  [key: string]: any
+}): Promise<void> => {
+  const dynamoDBClient = createDynamoDBClient();
+  const tableName = getTableName();
+
+  await dynamoDBClient.delete({
+    TableName: tableName,
+    Key: key,
+  })
+}

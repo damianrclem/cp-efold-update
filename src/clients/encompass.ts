@@ -187,3 +187,36 @@ export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer
         }
     });
 }
+
+/**
+ * Creates a loan
+ * @param {Object} params - The params needed to created the loan
+ * @param {string} params.loanFolder - The name of the folder to create the loan in
+ * @param {Object[]} params.applications - The applications on the loan
+ * @param {Object} params.applications[].borrower - The borrower on the application
+ * @param {string} params.applications[].borrower.FirstName - The first name of the borrower
+ * @param {string} params.applications[].borrower.LastName - The last name of the borrower
+ * @param {string} params.applications[].borrower.TaxIdentificationNumber - The tax id of the borrower (IE, an SSN)
+ * @returns {Promise<AxiosResponse<any>>} The create loan response
+ */
+export const createLoan = async (params: {
+    loanFolder: string
+    applications: Array<{
+        borrower: {
+            FirstName: string
+            LastName: string
+            TaxIdentificationNumber: string
+        }
+    }>
+}): Promise<AxiosResponse<any>> => {
+    return await callApi('post', `/encompass/v3/loans?loanFolder=${params.loanFolder}&view=id`, params.applications);
+}
+
+/**
+ * Deletes a loan
+ * @param {string} loanId - The id of the loan
+ * @returns {Promise<AxiosResponse<any>>} The delete loan response
+ */
+export const deleteLoan = async (loanId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('delete', `/encompass/v3/loans/${loanId}`)
+}
