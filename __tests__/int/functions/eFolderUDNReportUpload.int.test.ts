@@ -8,6 +8,8 @@ const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for t
 
 describe('eFolderUDNReportUpload', () => {
     test('it does not blow up', async () => {
+        try {
+            
         const SSN = "799684724";
         const createLoanResponse = await createLoan({
             loanFolder: "Testing",
@@ -44,6 +46,10 @@ describe('eFolderUDNReportUpload', () => {
         await expect(handler(event, {}, () => { })).resolves.not.toThrow();
 
         await deleteLoan(id);
+        } catch (error) {
+            console.log(error)
+            throw error;
+        }
     }, testTimeout)
 
     test('it does not blow up when notification count matches', async () => {
