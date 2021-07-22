@@ -209,7 +209,9 @@ export const createLoan = async (params: {
         }
     }>
 }): Promise<AxiosResponse<any>> => {
-    return await callApi('post', `/encompass/v3/loans?loanFolder=${params.loanFolder}&view=id`, params.applications);
+    return await callApi('post', `/encompass/v3/loans?loanFolder=${params.loanFolder}&view=id`, {
+        applications: params.applications,
+    });
 }
 
 /**
