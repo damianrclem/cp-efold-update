@@ -12,7 +12,8 @@
     },
     "dependencies": {
         "@aws-sdk/client-dynamodb": "^3.18.0",
-        "@aws-sdk/lib-dynamodb": "^3.18.0",
+        "@aws-sdk/lib-dynamodb": "^3.22.0",
+        "@aws-sdk/smithy-client": "^3.22.0",
         "@aws-sdk/util-dynamodb": "^3.22.0",
         "@revolutionmortgage/rm-logger": "^0.0.14",
         "axios": "^0.21.1",
@@ -22,6 +23,8 @@
         "xml-js": "^1.6.11"
     },
     "devDependencies": {
+        "@aws-sdk/types": "^3.22.0",
+        "@babel/core": "^7.14.8",
         "@babel/preset-env": "^7.11.5",
         "@babel/preset-typescript": "^7.10.4",
         "@types/aws-lambda": "^8.10.61",
