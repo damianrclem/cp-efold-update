@@ -19,7 +19,7 @@ custom:
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
   cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
-  creditPlustApiBaseUrl:
+  creditPlusApiBaseUrl:
     prod: https://creditplus-api-proxy.rmtg.io
     stage: https://creditplus-api-proxy.stagerm.io
     dev: https://creditplus-api-proxy.devrm.io
