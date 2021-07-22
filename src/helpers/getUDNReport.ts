@@ -25,10 +25,12 @@ interface GetUDNReportParams {
  * @returns {Promise<string>} - The base64 encdoed pdf udn report
  */
 export const getUDNReport = async (params: GetUDNReportParams): Promise<string> => {
-    const response = await getUDNOrder(params);
-    const parsedResponseAsJson = JSON.parse(xml2json(response.data, { compact: true }));
+    const { data } = await getUDNOrder(params);
+    console.log('xml', data);
 
-    console.log('xml', response)
+    const jsonString = xml2json(data, { compact: true });
+    console.log('json', jsonString);
+    const parsedResponseAsJson = JSON.parse(jsonString);
     console.log('json', parsedResponseAsJson);
     const pdf = jsonpath.query(parsedResponseAsJson, '$..EmbeddedContentXML._text')[0] ?? null;
     console.log(pdf);
