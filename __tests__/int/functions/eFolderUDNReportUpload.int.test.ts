@@ -61,7 +61,7 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 "requestPayload": {
                     "detail": {
-                        "LoanId": id,
+                        "LoanId": "loan id",
                     }
                 },
                 "responsePayload": {
