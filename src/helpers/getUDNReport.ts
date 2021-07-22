@@ -28,7 +28,10 @@ export const getUDNReport = async (params: GetUDNReportParams): Promise<string> 
     const response = await getUDNOrder(params);
     const parsedResponseAsJson = JSON.parse(xml2json(response.data, { compact: true }));
 
+    console.log('xml', response)
+    console.log('json', parsedResponseAsJson);
     const pdf = jsonpath.query(parsedResponseAsJson, '$..EmbeddedContentXML._text')[0] ?? null;
+    console.log(pdf);
 
     if (!pdf) {
         throw new PDFReportNotFoundError(params.vendorOrderIdentifier, parsedResponseAsJson);
