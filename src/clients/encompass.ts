@@ -205,7 +205,7 @@ export const createLoan = async (params: {
         borrower: {
             FirstName: string
             LastName: string
-            TaxIdentificationNumber: string
+            TaxIdentificationIdentifier: string
         }
     }>
 }): Promise<AxiosResponse<any>> => {

@@ -16,9 +16,9 @@ describe('eFolderUDNReportUpload', () => {
             applications: [
                 {
                     borrower: {
-                        FirstName: new Date().toUTCString(),
+                        FirstName: new Date().toDateString(),
                         LastName: "Integration Test",
-                        TaxIdentificationNumber: SSN
+                        TaxIdentificationIdentifier: SSN
                     }
                 }
             ]
