@@ -81,9 +81,7 @@ describe('eFolderUDNReportUpload', () => {
             attempts = attempts + 1;
         }
 
-        if (attempts >= 3) {
-            console.log("exceeeded number of attempts");
-        }
+        console.log(`attempts: ${attempts}`);
 
         const loanDocument = getLoanDocumentByTitle(loanDocuments, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
         expect(loanDocument).toBeTruthy();
