@@ -63,10 +63,10 @@ functions:
               event:
                 - "customfield-changed"
               loan:
-                - id:
+                id:
                   - anything-but: ""
               fields:
-                - 'CX.CTC.AUDIT1':
+                'CX.CTC.AUDIT1':
                   - anything-but: ""
 
 resources:
