@@ -92,59 +92,6 @@ describe('eFolderUDNReportUpload', () => {
         })
     }, testTimeout)
 
-    test('it does not blow up when uploading UDN report for a borrower', async () => {
-        const SSN = "799684724";
-        const VendorOrderId = "884";
-        const borrowerFirstName = "Integration Test";
-        const borrowerLastName = "Integration Test";
-        const createLoanResponse = await createLoan({
-            loanFolder: "Testing",
-            applications: [
-                {
-                    borrower: {
-                        FirstName: borrowerFirstName,
-                        LastName: borrowerLastName,
-                        TaxIdentificationIdentifier: SSN
-                    }
-                }
-            ]
-        });
-
-        const { id } = createLoanResponse.data;
-        const testItem = {
-            PK: `LOAN#${id}`,
-            SK: `LOAN#${id}`,
-            BorrowerFirstName: borrowerFirstName,
-            BorrowerLastName: borrowerLastName,
-            BorrowerSSN: SSN,
-            VendorOrderIdentifier: VendorOrderId,
-        };
-
-        const event = {
-            detail: {
-                loan: {
-                    id,
-                    fields: {}
-                }
-            }
-        };
-
-        AUDIT_FIELDS.forEach(field => {
-            testItem[field] = "old"
-            event.detail.loan.fields[field] = "new"
-        })
-
-        await putItem(testItem);
-
-        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
-
-        await deleteLoan(id);
-        await deleteItem({
-            PK: `LOAN#${id}`,
-            SK: `LOAN#${id}`,
-        })
-    }, testTimeout)
-
     test('it does not blow up when uploading UDN report for a borrower and coborrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
