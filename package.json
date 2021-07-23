@@ -8,6 +8,7 @@
         "test": "jest -c jest.config.js",
         "test:unit": "jest -c jest.config.unit.js",
         "test:int": "jest -c jest.config.int.js",
+        "test:e2e": "jest -c jest.config.e2e.js",
         "start": "sls offline"
     },
     "dependencies": {

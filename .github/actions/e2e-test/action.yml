@@ -1,0 +1,18 @@
+name: "Run end to end tests"
+description: "Runs end to end tests"
+runs:
+  using: "composite"
+  steps:
+    - name: install yarn
+      run: npm install -g yarn
+      shell: bash
+
+    - name: yarn install
+      run: |
+        yarn install
+      shell: bash
+
+    - name: "yarn run test:e2e"
+      run: |
+        yarn run test:e2e
+      shell: bash
