@@ -56,14 +56,14 @@ functions:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
             source:
-              - "lambda"
+              - "com.revolutionmortgage.encompass.ee-loan-hooks"
             detail-type:
               - "Loan"
             detail:
               event:
-                - "Lambda Function Invocation Result - Succeeded"
-            resources:
-              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-getOrders"
+                - "customfield-changed"
+              loanId:
+                - anything-but: ""
 
 resources:
   - ${file(./resources/alarms.yml)}
