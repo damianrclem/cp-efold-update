@@ -91,3 +91,6 @@ jobs:
 
       - name: "deploy"
         uses: ./.github/actions/deploy
+
+      - name: "run e2e tests"
+        uses: ./.github/actions/e2e-test
