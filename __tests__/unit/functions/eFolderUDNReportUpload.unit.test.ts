@@ -39,7 +39,7 @@ describe('eFolderUDNReportUpload', () => {
         const handlerWithNoLoanId = handler({}, {}, () => { });
 
         await expect(handlerWithNoLoanId).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoLoanId).rejects.toThrow('loanId missing on event detail');
+        await expect(handlerWithNoLoanId).rejects.toThrow('loan id missing on event detail');
     });
 
     test('it throws an InvalidParamsError if fields is not on the event detail payload', async () => {

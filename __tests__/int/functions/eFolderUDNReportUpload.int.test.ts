@@ -1,13 +1,31 @@
 // @ts-nocheck
 
 import { deleteItem, putItem } from "../../../src/common/database";
-import { handler } from "../../../src/functions/eFolderUDNReportUpload"
+import { handler, InvalidParamsError } from "../../../src/functions/eFolderUDNReportUpload"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
 import { AUDIT_FIELDS } from "../../../src/common/constants";
 
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
+    test('throws InvalidParamsError if event is missing loan id', () => {
+        const invalidHandler = handler({}, {}, () => { });
+        await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
+        await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
+    })
+
+    test('throws InvalidParamsError if event is missing loan fields', () => {
+        const invalidHandler = handler({
+            detail: {
+                loan: {
+                    id: "whatever"
+                }
+            }
+        }, {}, () => { });
+        await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
+        await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
+    })
+
     test('it does not blow up if the audit fields match', async () => {
         const testLoanId = 'joemama';
         const testItem = {

@@ -59,7 +59,7 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 export const handler: Handler = async (event: Event): Promise<void> => {
     const loanId = get(event, 'detail.loan.id');
     if (!loanId) {
-        throw new InvalidParamsError("loanId missing on event detail", event);
+        throw new InvalidParamsError("loan id missing on event detail", event);
     }
 
     const fields = get(event, 'detail.loan.fields');
