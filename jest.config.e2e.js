@@ -7,6 +7,6 @@ console.log('-------------------------------------------------------------------
 module.exports = {
     ...config,
     testMatch: [
-        '**/*int.e2e.ts',
+        '**/*e2e.test.ts',
     ]
 }
