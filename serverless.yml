@@ -62,8 +62,12 @@ functions:
             detail:
               event:
                 - "customfield-changed"
-              loanId:
-                - anything-but: ""
+              loan:
+                - id:
+                  - anything-but: ""
+              fields:
+                - 'CX.CTC.AUDIT1':
+                  - anything-but: ""
 
 resources:
   - ${file(./resources/alarms.yml)}
