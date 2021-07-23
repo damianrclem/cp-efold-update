@@ -82,6 +82,7 @@ describe('eFolderUDNReportUpload', () => {
         }
 
         console.log(`attempts: ${attempts}`);
+        console.log(loanDocuments);
 
         const loanDocument = getLoanDocumentByTitle(loanDocuments, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
         expect(loanDocument).toBeTruthy();
