@@ -1,20 +1,20 @@
 // @ts-nocheck
 
 import { deleteItem, putItem } from "../../../src/common/database";
-import { handler, InvalidParamsError } from "../../../src/functions/eFolderUDNReportUpload"
+import { handler, InvalidParamsError, LoanNotFoundError } from "../../../src/functions/eFolderUDNReportUpload"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
 import { AUDIT_FIELDS } from "../../../src/common/constants";
 
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
-    test('throws InvalidParamsError if event is missing loan id', () => {
+    test('throws InvalidParamsError if event is missing loan id', async () => {
         const invalidHandler = handler({}, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
         await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
-    })
+    }, testTimeout)
 
-    test('throws InvalidParamsError if event is missing loan fields', () => {
+    test('throws InvalidParamsError if event is missing loan fields', async () => {
         const invalidHandler = handler({
             detail: {
                 loan: {
@@ -24,7 +24,19 @@ describe('eFolderUDNReportUpload', () => {
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
         await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
-    })
+    }, testTimeout)
+
+    test('throws LoanNotFoundError loan is not found', async () => {
+        const invalidHandler = handler({
+            detail: {
+                loan: {
+                    id: "whatever",
+                    fields: {}
+                }
+            }
+        }, {}, () => { });
+        await expect(invalidHandler).rejects.toThrow(LoanNotFoundError);
+    }, testTimeout)
 
     test('it does not blow up if the audit fields match', async () => {
         const testLoanId = 'joemama';
