@@ -3,8 +3,9 @@ import { deleteItem, putItem } from "../../src/common/database";
 import { createLoan, deleteLoan, getLoanDocuments } from "../../src/clients/encompass";
 import { AUDIT_FIELDS, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from "../../src/common/constants";
 import { getLoanDocumentByTitle } from "../../src/helpers/getLoanDocumentByTitle";
+import wait from './wait';
 
-const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda\
+const testTimeout = 120000; // 2 minutes.
 
 describe('eFolderUDNReportUpload', () => {
     test('upload a PDF UDN Report to Encompass eFolder', async () => {
@@ -70,9 +71,21 @@ describe('eFolderUDNReportUpload', () => {
             ]
         }))
 
-        // wait ten seconds and we will see if everything worked
-        const getLoanDocumentsReponse = await getLoanDocuments(id);
-        const loanDocument = getLoanDocumentByTitle(getLoanDocumentsReponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+        let loanDocuments = [];
+        let attempts = 1;
+        while(loanDocuments.length === 0 && attempts < 3) {
+            await wait(10000);
+            // wait ten seconds and we will see if everything worked
+            const getLoanDocumentsReponse = await getLoanDocuments(id);
+            loanDocuments = getLoanDocumentsReponse.data;
+            attempts = attempts + 1;
+        }
+
+        if (attempts >= 3) {
+            console.log("exceeeded number of attempts");
+        }
+
+        const loanDocument = getLoanDocumentByTitle(loanDocuments, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
         expect(loanDocument).toBeTruthy();
 
         await deleteLoan(id);

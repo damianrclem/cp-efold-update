@@ -68,6 +68,7 @@ functions:
                 fields:
                   'CX.CTC.AUDIT1':
                     - anything-but: ""
+    
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
