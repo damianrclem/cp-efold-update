@@ -65,9 +65,9 @@ functions:
               loan:
                 id:
                   - anything-but: ""
-              fields:
-                'CX.CTC.AUDIT1':
-                  - anything-but: ""
+                fields:
+                  'CX.CTC.AUDIT1':
+                    - anything-but: ""
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
