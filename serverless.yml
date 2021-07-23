@@ -60,7 +60,7 @@ functions:
             detail-type:
               - "Loan"
             detail:
-              event:
+              eventType:
                 - "customfield-changed"
               loan:
                 id:
