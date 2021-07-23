@@ -23,7 +23,7 @@ describe('eFolderUDNReportUpload', () => {
             }
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
-        await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
+        await expect(invalidHandler).rejects.toThrow("fields missing on event detail");
     }, testTimeout)
 
     test('throws LoanNotFoundError loan is not found', async () => {
