@@ -1,10 +1,11 @@
 // @ts-nocheck
-import { handler, InvalidParamsError, LoanDocumentForUDNReportsNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
+import { handler, InvalidParamsError, LoanDocumentForUDNReportsNotFoundError, LoanNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
 import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
 import { getUDNReport } from "../../../src/helpers/getUDNReport";
 import { getItem, putItem } from '../../../src/common/database';
+import { AUDIT_FIELDS } from '../../../src/common/constants';
 
 jest.mock('../../../src/clients/encompass', () => ({
     getLoan: jest.fn(),
@@ -34,108 +35,68 @@ jest.mock("../../../src/common/database", () => ({
 }))
 
 describe('eFolderUDNReportUpload', () => {
-    test('it throws an InvalidParamsError if the loanId is not on the event request payload', async () => {
+    test('it throws an InvalidParamsError if the loanId is not on the event detail payload', async () => {
         const handlerWithNoLoanId = handler({}, {}, () => { });
 
         await expect(handlerWithNoLoanId).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoLoanId).rejects.toThrow('loanId missing on request payload');
+        await expect(handlerWithNoLoanId).rejects.toThrow('loanId missing on event detail');
     });
 
-    test('it throws an InvalidParamsError if vendorOrderIdentifier is not on the event response payload', async () => {
-        const handleWithNoVenderOrderId = handler({
+    test('it throws an InvalidParamsError if fields is not on the event detail payload', async () => {
+        const handlerWithNoFields = handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {}
-            }
-        }, {}, () => { })
-
-        await expect(handleWithNoVenderOrderId).rejects.toThrow(InvalidParamsError);
-        await expect(handleWithNoVenderOrderId).rejects.toThrow('vendorOrderIdentifier missing on request payload');
-    });
-
-    test('it throws an InvalidParamsError if firstName is not on the event response payload', async () => {
-        const handleWithNoFirstName = handler({
-            detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {
-                    vendorOrderIdentifier: 'blah'
+                loan: {
+                    id: '123'
                 }
             }
         }, {}, () => { })
 
-        await expect(handleWithNoFirstName).rejects.toThrow(InvalidParamsError);
-        await expect(handleWithNoFirstName).rejects.toThrow('firstName missing on request payload');
+        await expect(handlerWithNoFields).rejects.toThrow(InvalidParamsError);
+        await expect(handlerWithNoFields).rejects.toThrow('fields missing on event detail');
     });
 
-    test('it throws an InvalidParamsError if lastName is not on the event response payload', async () => {
-        const handleWithNoLastName = handler({
+    test('it throws a LoanNotFoundError if no loan was found in the database', async () => {
+        await expect(handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {
-                    vendorOrderIdentifier: 'blah',
-                    firstName: 'Berty'
+                loan: {
+                    id: '123',
+                    fields: {}
                 }
             }
-        }, {}, () => { })
-
-        await expect(handleWithNoLastName).rejects.toThrow(InvalidParamsError);
-        await expect(handleWithNoLastName).rejects.toThrow('lastName missing on request payload');
+        }, {}, () => { })).rejects.toThrow(LoanNotFoundError);
     });
 
-    test('it throws an InvalidParamsError if socialSecurityNumber is not on the event response payload', async () => {
-        const handlerWithNoSocialSecurityNumber = handler({
+    test('it does not throw an error if the loan audit fields have not changed', async () => {
+        const testItem = {};
+        const fields = {};
+        AUDIT_FIELDS.forEach((field) => {
+            const value = new Date().toString();
+            testItem[field] = value;
+            fields[field] = value;
+        })
+
+        
+        getItem.mockResolvedValue({
+            Item: testItem
+        })
+
+        await expect(handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {
-                    vendorOrderIdentifier: 'blah',
-                    firstName: 'Berty',
-                    lastName: 'McBertface'
+                loan: {
+                    id: '123',
+                    fields: fields
                 }
             }
-        }, {}, () => { })
-
-        await expect(handlerWithNoSocialSecurityNumber).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoSocialSecurityNumber).rejects.toThrow('socialSecurityNumber missing on request payload');
-    });
-
-    test('it throws an InvalidParamsError if notificationsCount is not on the event response payload', async () => {
-        const handlerWithNoNotificationsCount = handler({
-            detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {
-                    vendorOrderIdentifier: 'blah',
-                    firstName: 'Berty',
-                    lastName: 'McBertface',
-                    socialSecurityNumber: '7'
-                }
-            }
-        }, {}, () => { })
-
-        await expect(handlerWithNoNotificationsCount).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoNotificationsCount).rejects.toThrow('notificationsCount missing on request payload');
-    });
+        }, {}, () => { })).resolves.not.toThrowError();
+    })
 
     test('it does not throw an error if there is an existing loan document to upload to', async () => {
+        getItem.mockResolvedValue({
+            Item: {
+                [AUDIT_FIELDS[0]]: 'whatever'
+            }
+        })
+        
         getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve({
                 data: {}
@@ -153,12 +114,6 @@ describe('eFolderUDNReportUpload', () => {
             })
         }))
 
-        getItem.mockReturnValue(() => new Promise((resolve) => {
-            resolve({
-                Item: {}
-            })
-        }));
-
         getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve('I am a pdf')
         }))
@@ -169,23 +124,21 @@ describe('eFolderUDNReportUpload', () => {
 
         await expect(handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123',
-                    }
-                },
-                responsePayload: {
-                    firstName: 'Lord',
-                    lastName: 'McMuffin',
-                    vendorOrderIdentifier: '23',
-                    socialSecurityNumber: '123',
-                    notificationsCount: 1
+                loan: {
+                    id: '123',
+                    fields: {}
                 }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
 
     test('it does not throw an error if there is NOT an existing loan document to upload to', async () => {
+        getItem.mockResolvedValue({
+            Item: {
+                [AUDIT_FIELDS[0]]: 'whatever'
+            }
+        })
+        
         getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve({
                 data: {}
@@ -209,35 +162,27 @@ describe('eFolderUDNReportUpload', () => {
             })
         }))
 
-        getItem.mockReturnValue(() => new Promise((resolve) => {
-            resolve({
-                Item: {}
-            })
-        }));
-
         getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve('I am a pdf')
         }))
 
         await expect(handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123'
-                    }
-                },
-                responsePayload: {
-                    firstName: 'Lord',
-                    lastName: 'McMuffin',
-                    vendorOrderIdentifier: '23',
-                    socialSecurityNumber: '123',
-                    notificationsCount: 1
+                loan: {
+                    id: '123',
+                    fields: {}
                 }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
 
     test('it does throw an error if no document was found to upload to', async () => {
+        getItem.mockResolvedValue({
+            Item: {
+                [AUDIT_FIELDS[0]]: 'whatever'
+            }
+        })
+
         getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve({
                 data: {}
@@ -263,29 +208,15 @@ describe('eFolderUDNReportUpload', () => {
 
         getLoanDocumentByTitle.mockReturnValue(undefined);
 
-        getItem.mockReturnValue(() => new Promise((resolve) => {
-            resolve({
-                Item: {}
-            })
-        }));
-
         getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
             resolve('I am a pdf')
         }))
 
         await expect(handler({
             detail: {
-                requestPayload: {
-                    detail: {
-                        LoanId: '123',
-                    }
-                },
-                responsePayload: {
-                    firstName: 'Lord',
-                    lastName: 'McMuffin',
-                    vendorOrderIdentifier: '23',
-                    socialSecurityNumber: '123',
-                    notificationsCount: 1
+                loan: {
+                    id: '123',
+                    fields: {}
                 }
             }
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);

@@ -3,11 +3,12 @@ import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
 import { getItem, putItem } from '../common/database';
-import { UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
+import { AUDIT_FIELDS, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from '../helpers/getEncompassLoanBorrowerBySocialSecurityNumber';
 import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
 import { getUDNReport } from '../helpers/getUDNReport';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
+import { loanAuditFieldsHaveChanged as haveLoanAuditFieldsChanged } from '../helpers/haveLoanAuditFieldsChanged';
 
 export class InvalidParamsError extends LoggerError {
     constructor(message: string, data?: any) {
@@ -27,34 +28,22 @@ export class LoanNotFoundError extends LoggerError {
     }
 }
 
-interface EventParams {
-    loanId: string;
-}
-
-/**
- * This will get the required params for the lambda to execute.
- * If not, an InvalidParamsError will be thrown
- * @param {Event} event - The event to verify
- * @returns {EventParams} - the event params required to fulfill the lambda execution
- */
-const getEventParams = (event: Event): EventParams => {
-    const loanId = get(event, 'detail.requestPayload.detail.LoanId');
-    if (!loanId) {
-        throw new InvalidParamsError("loanId missing on request payload", event);
-    }
-
-    return {
-        loanId,
-    }
-} 
-
 interface Detail {
-    requestPayload: {
-        detail: {
-            LoanId: string;
+    loan: {
+        id: string;
+        fields: {
+            "CX.CTC.AUDIT1": string;
+            "CX.CTC.AUDIT2": string;
+            "CX.CTC.AUDIT3": string;
+            "CX.CTC.AUDIT4": string;
+            "CX.CTC.AUDIT5": string;
+            "CX.CTC.AUDIT6": string;
+            "CX.CTC.AUDIT7": string;
+            "CX.CTC.AUDIT8": string;
+            "CX.CTC.AUDIT9": string;
+            "CX.CTC.AUDIT10": string;
         }
     };
-    responsePayload: EventParams;
 }
 
 
@@ -68,9 +57,15 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
-    const {
-        loanId,
-    } = getEventParams(event)
+    const loanId = get(event, 'detail.loan.id');
+    if (!loanId) {
+        throw new InvalidParamsError("loanId missing on event detail", event);
+    }
+
+    const fields = get(event, 'detail.loan.fields');
+    if (!fields) {
+        throw new InvalidParamsError("fields missing on event detail", event);
+    }
 
     // Get the loan from the database
     const result = await getItem({
@@ -78,11 +73,19 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         SK: `LOAN#${loanId}`
     });
 
+    console.log(result)
     // If we can't find it, throw an error.
     if (!result || !result.Item) {
         throw new LoanNotFoundError(loanId);
     }
 
+    // Have the audit fields changed? If not, return early.
+    const auditFieldsHaveChanged = haveLoanAuditFieldsChanged(result.Item, fields);
+    if (!auditFieldsHaveChanged) {
+        return;
+    }
+
+    // If they have changed, we need to upload the UDN report.
     const {
         BorrowerFirstName,
         BorrowerLastName,
@@ -104,6 +107,8 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         })
     ];
 
+    console.log(uploadRequests);
+
     // If we have a coborrower, add it to the list of requests
     if (CoborrowerFirstName && CoborrowerLastName && CoborrowerSSN) {
         uploadRequests.push(uploadUDNReportForBorrower({
@@ -117,6 +122,24 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     
     // Fire all requests
     await Promise.all(uploadRequests);
+
+    // Update all of the audit fields with the latest data from the event detail
+    const auditFields = {};
+    AUDIT_FIELDS.forEach((field: string) => {
+        auditFields[field] = fields[field];
+    })
+    await putItem({
+        PK: `LOAN#${loanId}`,
+        SK: `LOAN#${loanId}`,
+        BorrowerFirstName,
+        BorrowerLastName,
+        BorrowerSSN,
+        CoborrowerFirstName,
+        CoborrowerLastName,
+        CoborrowerSSN,
+        VendorOrderIdentifier,
+        ...fields,
+    })
 };
 
 const uploadUDNReportForBorrower = async ({
@@ -134,12 +157,16 @@ const uploadUDNReportForBorrower = async ({
         vendorOrderIdentifier
     })
 
+    console.log(pdf)
+
     // Get the loan borrower information
     const loanResponse = await getLoan(loanId);
+    console.log(loanResponse)
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
 
     const existingLoanDocumentsResponse = await getLoanDocuments(loanId);
     const existingLoanDocument = getLoanDocumentByTitle(existingLoanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+    console.log(existingLoanDocument)
 
     // If there is an existing loan document with the correct title, upload to that document
     if (existingLoanDocument) {
@@ -151,6 +178,8 @@ const uploadUDNReportForBorrower = async ({
     await createLoanDocument(loanId, borrower.applicationId);
     const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
     const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+
+    console.log(newLoanDocument)
 
     // If we still can't find it, something has gone wrong
     if (!newLoanDocument) {

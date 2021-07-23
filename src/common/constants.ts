@@ -6,4 +6,18 @@ export const STAGE = {
     DEV: 'dev',
     STAGE: 'stage',
     PROD: 'prod'
-}
+};
+
+export const AUDIT_FIELDS: Array<string> = [
+    "CX.CTC.AUDIT1",
+    "CX.CTC.AUDIT2",
+    "CX.CTC.AUDIT3",
+    "CX.CTC.AUDIT4",
+    "CX.CTC.AUDIT5",
+    "CX.CTC.AUDIT6",
+    "CX.CTC.AUDIT7",
+    "CX.CTC.AUDIT8",
+    "CX.CTC.AUDIT9",
+    "CX.CTC.AUDIT10",
+];
+
