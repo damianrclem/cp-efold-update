@@ -67,7 +67,7 @@ describe('eFolderUDNReportUpload', () => {
         }))
 
         // wait ten seconds and we will see if everything worked
-        setTimeout(async () => {
+        return setTimeout(async () => {
             const getLoanDocumentsReponse = await getLoanDocuments(id);
             const loanDocument = getLoanDocumentByTitle(getLoanDocumentsReponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
             expect(loanDocument).toBeTruthy();
