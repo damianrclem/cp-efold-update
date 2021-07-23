@@ -70,7 +70,6 @@ functions:
                   - anything-but: ""
 
 resources:
-  - ${file(./resources/alarms.yml)}
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
 
 plugins:
