@@ -42,8 +42,8 @@ describe('eFolderUDNReportUpload', () => {
     test('it does not blow up when uploading UDN report for a borrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
-        const borrowerFirstName = new Date().toDateString();
-        const borrowerLastName = "Integreation Test";
+        const borrowerFirstName = "Integration Test";
+        const borrowerLastName = "Integration Test";
         const createLoanResponse = await createLoan({
             loanFolder: "Testing",
             applications: [
