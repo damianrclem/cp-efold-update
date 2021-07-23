@@ -3,88 +3,91 @@
 import { deleteItem, putItem } from "../../../src/common/database";
 import { handler } from "../../../src/functions/eFolderUDNReportUpload"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
+import { AUDIT_FIELDS } from "../../../src/common/constants";
 
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
-    test('it does not blow up', async () => {
-        try {
-            
+    test('it does not blow up if the audit fields match', () => {
+        const testLoanId = 'joemama';
+        const testItem = {
+            PK: `LOAN#${testLoanId}`,
+            SK: `LOAN#${testLoanId}`,
+        };
+        const event = {
+            detail: {
+                loan: {
+                    id: testLoanId,
+                    fields: {}
+                }
+            }
+        }
+
+        AUDIT_FIELDS.forEach(field => {
+            const value = new Date().toString();
+            testItem[field] = value
+            event.detail.loan.fields[field] = value
+        })
+
+        await putItem(testItem)
+
+        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
+
+        await deleteItem({
+            PK: `LOAN#${testLoanId}`,
+            SK: `LOAN#${testLoanId}`,
+        })
+    });
+
+    test('it does not blow up when uploading UDN report for a borrower', () => {
         const SSN = "799684724";
+        const VendorOrderId = "884";
+        const borrowerFirstName = new Date().toDateString();
+        const borrowerLastName = "Integreation Test";
         const createLoanResponse = await createLoan({
             loanFolder: "Testing",
             applications: [
                 {
                     borrower: {
-                        FirstName: new Date().toDateString(),
-                        LastName: "Integration Test",
+                        FirstName: borrowerFirstName,
+                        LastName: borrowerLastName,
                         TaxIdentificationIdentifier: SSN
                     }
                 }
             ]
         });
-        const { id } = createLoanResponse.data;
 
-        // Don't worry, this is a fake/test loan in Encompass.
+        const { id } = createLoanResponse.data;
+        const testItem = {
+            PK: `LOAN#${id}`,
+            SK: `LOAN#${id}`,
+            BorrowerFirstName: borrowerFirstName,
+            BorrowerLastName: borrowerLastName,
+            BorrowerSSN: SSN,
+            VendorOrderIdentifier: VendorOrderId,
+        };
+
         const event = {
             detail: {
-                "requestPayload": {
-                    "detail": {
-                        "LoanId": id,
-                    }
-                },
-                "responsePayload": {
-                    "firstName": "Christopher",
-                    "lastName": "Gzpygzkx",
-                    "socialSecurityNumber": SSN,
-                    "vendorOrderIdentifier": "884",
-                    "notificationsCount": 1,
+                loan: {
+                    id,
+                    fields: {}
                 }
             }
-        }
+        };
 
-        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
-
-        await deleteLoan(id);
-        } catch (error) {
-            console.log(error)
-            throw error;
-        }
-    }, testTimeout)
-
-    test('it does not blow up when notification count matches', async () => {
-        const orderID = "I can be whatever I want";
-        const SSN = "So can I";
-        const notificationsCount = 12;
-        await putItem({
-            PK: `ORDER#${orderID}`,
-            SK: `SSN#${SSN}`,
-            NotificationsCount: notificationsCount
+        AUDIT_FIELDS.forEach(field => {
+            testItem[field] = "old"
+            event.detail.loan.fields[field] = "new"
         })
 
-        // Don't worry, this is a fake/test loan in Encompass.
-        const event = {
-            detail: {
-                "requestPayload": {
-                    "detail": {
-                        "LoanId": "loan id",
-                    }
-                },
-                "responsePayload": {
-                    "firstName": "Christopher",
-                    "lastName": "Gzpygzkx",
-                    "socialSecurityNumber": SSN,
-                    "vendorOrderIdentifier": orderID,
-                    "notificationsCount": notificationsCount,
-                }
-            }
-        }
+        await putItem(testItem);
 
         await expect(handler(event, {}, () => { })).resolves.not.toThrow();
 
         await deleteItem({
-            PK: `ORDER#${orderID}`,
-            SK: `SSN#${SSN}`,
+            PK: `LOAN#${testLoanId}`,
+            SK: `LOAN#${testLoanId}`,
         })
-    }, testTimeout)
+    })
 })
