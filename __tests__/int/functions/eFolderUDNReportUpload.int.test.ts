@@ -137,6 +137,11 @@ describe('eFolderUDNReportUpload', () => {
                         FirstName: borrowerFirstName,
                         LastName: borrowerLastName,
                         TaxIdentificationIdentifier: SSN
+                    },
+                    coborrower: {
+                        FirstName: coBorrowerFirstName,
+                        LastName: coBorrowerLastName,
+                        TaxIdentificationIdentifier: SSN
                     }
                 }
             ]

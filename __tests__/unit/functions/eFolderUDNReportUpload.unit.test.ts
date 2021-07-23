@@ -4,7 +4,7 @@ import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clie
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
 import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
 import { getUDNReport } from "../../../src/helpers/getUDNReport";
-import { getItem, putItem } from '../../../src/common/database';
+import { getItem } from '../../../src/common/database';
 import { AUDIT_FIELDS } from '../../../src/common/constants';
 
 jest.mock('../../../src/clients/encompass', () => ({
