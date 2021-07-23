@@ -55,6 +55,9 @@ describe('eFolderUDNReportUpload', () => {
         const eventBridgeClient = new EventBridgeClient({
             region: 'us-east-2',
         });
+
+        console.log(event.detail);
+
         await eventBridgeClient.send(new PutEventsCommand({
             Entries: [
                 {
@@ -67,16 +70,14 @@ describe('eFolderUDNReportUpload', () => {
         }))
 
         // wait ten seconds and we will see if everything worked
-        return setTimeout(async () => {
-            const getLoanDocumentsReponse = await getLoanDocuments(id);
-            const loanDocument = getLoanDocumentByTitle(getLoanDocumentsReponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
-            expect(loanDocument).toBeTruthy();
+        const getLoanDocumentsReponse = await getLoanDocuments(id);
+        const loanDocument = getLoanDocumentByTitle(getLoanDocumentsReponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
+        expect(loanDocument).toBeTruthy();
 
-            await deleteLoan(id);
-            await deleteItem({
-                PK: `LOAN#${id}`,
-                SK: `LOAN#${id}`,
-            })
-        }, 10000)
+        await deleteLoan(id);
+        await deleteItem({
+            PK: `LOAN#${id}`,
+            SK: `LOAN#${id}`,
+        })
     }, testTimeout)
 })
