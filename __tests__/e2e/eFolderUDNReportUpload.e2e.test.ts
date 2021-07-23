@@ -56,16 +56,17 @@ describe('eFolderUDNReportUpload', () => {
             region: 'us-east-2',
         });
 
-        console.log(event.detail);
+        const entry = {
+            Detail: JSON.stringify(event.detail),
+            DetailType: "customfield-changed",
+            EventBusName: `${process.env.ENV}-encompass`,
+            Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
+        }
+        console.log(entry);
 
         await eventBridgeClient.send(new PutEventsCommand({
             Entries: [
-                {
-                    Detail: JSON.stringify(event.detail),
-                    DetailType: "customfield-changed",
-                    EventBusName: `${process.env.ENV}-encompass`,
-                    Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
-                },
+                entry,
             ]
         }))
 
