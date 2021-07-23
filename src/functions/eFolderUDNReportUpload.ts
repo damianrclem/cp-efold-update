@@ -73,7 +73,6 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         SK: `LOAN#${loanId}`
     });
 
-    console.log(result)
     // If we can't find it, throw an error.
     if (!result || !result.Item) {
         throw new LoanNotFoundError(loanId);
@@ -106,8 +105,6 @@ export const handler: Handler = async (event: Event): Promise<void> => {
             vendorOrderIdentifier: VendorOrderIdentifier
         })
     ];
-
-    console.log(uploadRequests);
 
     // If we have a coborrower, add it to the list of requests
     if (CoborrowerFirstName && CoborrowerLastName && CoborrowerSSN) {
@@ -157,16 +154,12 @@ const uploadUDNReportForBorrower = async ({
         vendorOrderIdentifier
     })
 
-    console.log(pdf)
-
     // Get the loan borrower information
     const loanResponse = await getLoan(loanId);
-    console.log(loanResponse)
     const borrower = getEncompassLoanBorrowerBySocialSecurityNumber(socialSecurityNumber, loanResponse.data);
 
     const existingLoanDocumentsResponse = await getLoanDocuments(loanId);
     const existingLoanDocument = getLoanDocumentByTitle(existingLoanDocumentsResponse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
-    console.log(existingLoanDocument)
 
     // If there is an existing loan document with the correct title, upload to that document
     if (existingLoanDocument) {
@@ -178,8 +171,6 @@ const uploadUDNReportForBorrower = async ({
     await createLoanDocument(loanId, borrower.applicationId);
     const newLoanDocumentsRepsonse = await getLoanDocuments(loanId);
     const newLoanDocument = getLoanDocumentByTitle(newLoanDocumentsRepsonse.data, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
-
-    console.log(newLoanDocument)
 
     // If we still can't find it, something has gone wrong
     if (!newLoanDocument) {

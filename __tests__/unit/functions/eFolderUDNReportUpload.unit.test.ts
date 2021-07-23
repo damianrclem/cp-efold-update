@@ -97,26 +97,20 @@ describe('eFolderUDNReportUpload', () => {
             }
         })
         
-        getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }));
+        getLoan.mockResolvedValue({
+            data: {}
+        });
 
         getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
             application: '123',
             fullName: 'bert',
         })
 
-        getLoanDocuments.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }))
+        getLoanDocuments.mockResolvedValue({
+            data: {}
+        })
 
-        getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve('I am a pdf')
-        }))
+        getUDNReport.mockResolvedValue('i am a pdf')
 
         getLoanDocumentByTitle.mockReturnValue({
             id: 'hey yo'
@@ -139,32 +133,30 @@ describe('eFolderUDNReportUpload', () => {
             }
         })
         
-        getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }));
+        getLoan.mockResolvedValue({
+            data: {}
+        })
 
         getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
             application: '123',
             fullName: 'bert',
         })
 
-        getLoanDocuments.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }))
+        getLoanDocuments.mockResolvedValue({
+            data: {}
+        })
 
-        createLoanDocument.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: ''
-            })
-        }))
+        createLoanDocument.mockResolvedValue({
+            data: {}
+        })
 
-        getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve('I am a pdf')
-        }))
+        getLoanDocumentByTitle
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce({
+                id: 'hey yo'
+            })
+
+        getUDNReport.mockResolvedValue('i am a pdf')
 
         await expect(handler({
             detail: {
@@ -183,34 +175,26 @@ describe('eFolderUDNReportUpload', () => {
             }
         })
 
-        getLoan.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }));
+        getLoan.mockResolvedValue({
+            data: {}
+        })
 
         getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
             application: '123',
             fullName: 'bert',
         })
 
-        getLoanDocuments.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: {}
-            })
-        }))
+        getLoanDocuments.mockResolvedValue({
+            data: {}
+        })
 
-        createLoanDocument.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve({
-                data: ''
-            })
-        }))
+        createLoanDocument.mockResolvedValue({
+            data: {}
+        })
 
         getLoanDocumentByTitle.mockReturnValue(undefined);
 
-        getUDNReport.mockReturnValue(() => new Promise((resolve, reject) => {
-            resolve('I am a pdf')
-        }))
+        getUDNReport.mockResolvedValue('I am a pdf')
 
         await expect(handler({
             detail: {
@@ -220,5 +204,89 @@ describe('eFolderUDNReportUpload', () => {
                 }
             }
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
+    });
+
+    test('it does not throw an error if there is a Coborrower and an existing loan document to upload to', async () => {
+        getItem.mockResolvedValue({
+            Item: {
+                [AUDIT_FIELDS[0]]: 'whatever',
+                CoborrowerFirstName: 'Billy',
+                CoborrowerLastName: 'Bob',
+                CoborrowerSSN: 'the clown'
+            }
+        })
+        
+        getLoan.mockResolvedValue({
+            data: {}
+        });
+
+        getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
+            application: '123',
+            fullName: 'bert',
+        })
+
+        getLoanDocuments.mockResolvedValue({
+            data: {}
+        })
+
+        getUDNReport.mockResolvedValue('i am a pdf')
+
+        getLoanDocumentByTitle.mockReturnValue({
+            id: 'hey yo'
+        })
+
+        await expect(handler({
+            detail: {
+                loan: {
+                    id: '123',
+                    fields: {}
+                }
+            }
+        }, {}, () => { })).resolves.not.toThrowError();
+    });
+
+    test('it does not throw an error if there is a Coborrower and NOT an existing loan document to upload to', async () => {
+        getItem.mockResolvedValue({
+            Item: {
+                [AUDIT_FIELDS[0]]: 'whatever',
+                CoborrowerFirstName: 'Billy',
+                CoborrowerLastName: 'Bob',
+                CoborrowerSSN: 'the clown'
+            }
+        })
+        
+        getLoan.mockResolvedValue({
+            data: {}
+        })
+
+        getEncompassLoanBorrowerBySocialSecurityNumber.mockReturnValue({
+            application: '123',
+            fullName: 'bert',
+        })
+
+        getLoanDocuments.mockResolvedValue({
+            data: {}
+        })
+
+        createLoanDocument.mockResolvedValue({
+            data: {}
+        })
+
+        getLoanDocumentByTitle
+            .mockReturnValueOnce(undefined)
+            .mockReturnValueOnce({
+                id: 'hey yo'
+            })
+
+        getUDNReport.mockResolvedValue('i am a pdf')
+
+        await expect(handler({
+            detail: {
+                loan: {
+                    id: '123',
+                    fields: {}
+                }
+            }
+        }, {}, () => { })).resolves.not.toThrowError();
     });
 });
