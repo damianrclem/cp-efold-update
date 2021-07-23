@@ -8,7 +8,7 @@ import { AUDIT_FIELDS } from "../../../src/common/constants";
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
-    test('it does not blow up if the audit fields match', () => {
+    test('it does not blow up if the audit fields match', async () => {
         const testLoanId = 'joemama';
         const testItem = {
             PK: `LOAN#${testLoanId}`,
@@ -37,9 +37,9 @@ describe('eFolderUDNReportUpload', () => {
             PK: `LOAN#${testLoanId}`,
             SK: `LOAN#${testLoanId}`,
         })
-    });
+    }, testTimeout);
 
-    test('it does not blow up when uploading UDN report for a borrower', () => {
+    test('it does not blow up when uploading UDN report for a borrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
         const borrowerFirstName = new Date().toDateString();
@@ -89,5 +89,5 @@ describe('eFolderUDNReportUpload', () => {
             PK: `LOAN#${testLoanId}`,
             SK: `LOAN#${testLoanId}`,
         })
-    })
+    }, testTimeout)
 })
