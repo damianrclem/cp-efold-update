@@ -86,8 +86,8 @@ describe('eFolderUDNReportUpload', () => {
         await expect(handler(event, {}, () => { })).resolves.not.toThrow();
 
         await deleteItem({
-            PK: `LOAN#${testLoanId}`,
-            SK: `LOAN#${testLoanId}`,
+            PK: `LOAN#${id}`,
+            SK: `LOAN#${id}`,
         })
     }, testTimeout)
 })
