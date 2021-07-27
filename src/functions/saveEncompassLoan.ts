@@ -23,7 +23,12 @@ type EVENT_TYPE = 'Loan';
 type Handler = EventBridgeHandler<EVENT_TYPE, Detail, void>;
 export type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 
-const validateLoanData = (event: Event, pathsToRequiredParams: Array<string>) => {
+/**
+ * 
+ * @param {Event} event - The event from AWS Event bridge
+ * @param {Array<string>} pathsToRequiredParams - The paths to all required parameters expected on the event payload
+ */
+const validateEventPayload = (event: Event, pathsToRequiredParams: Array<string>) => {
     pathsToRequiredParams.forEach((path: string) => {
         const value = get(event, path);
         if (!value) {
@@ -32,8 +37,16 @@ const validateLoanData = (event: Event, pathsToRequiredParams: Array<string>) =>
     });
 }
 
+/**
+ * 
+ * @param {Event} event - The event from AWS Event bridge
+ * @param {string} event.eventType - The event type
+ * @param {Object} event.loan - The loan on the event
+ * @param {string} event.loan.id - The id of the loan
+ * @param {Object} event.loan.fields - Additional fields on the loan
+ */
 export const handler: Handler = async (event: Event) => {
-    validateLoanData(event, [
+    validateEventPayload(event, [
         "detail.loan.id",
         "detail.loan.fields['4000']",
         "detail.loan.fields['4002']",
