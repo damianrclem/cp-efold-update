@@ -19,7 +19,7 @@ interface Detail {
 
 type EVENT_TYPE = 'Loan';
 type Handler = EventBridgeHandler<EVENT_TYPE, Detail, void>;
-type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
+export type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 
 const validateLoanData = (event: Event, pathsToRequiredParams: Array<string>) => {
     pathsToRequiredParams.forEach((path: string) => {
@@ -36,8 +36,5 @@ export const handler: Handler = async (event: Event) => {
         "detail.loan.fields['4000']",
         "detail.loan.fields['4002']",
         "detail.loan.fields['65']",
-        "detail.loan.fields['4004']",
-        "detail.loan.fields['4006']",
-        "detail.loan.fields['97']"
     ])
 }
