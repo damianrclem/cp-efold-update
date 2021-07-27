@@ -28,15 +28,18 @@ describe('saveEncompassLoan', () => {
 
         const entry = {
             Detail: JSON.stringify(event.detail),
-            DetailType: "Loan",
+            DetailType: "lambda",
             EventBusName: `${process.env.ENV}-credit-plus`,
-            Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
+            Source: 'Lambda Function Invocation Result - Success',
+            Resources: [
+                `arn:aws:lambda:${process.env.REGION}:${process.env.ACCOUNT_ID}:function:cp-create-udn-order-${process.env.ENV}-createUdnOrder:$LATEST`
+            ]
         }
 
         await eventBridgeClient.send(new PutEventsCommand({
             Entries: [
                 entry,
-            ]
+            ],
         }))
 
         await wait(10000);
@@ -80,9 +83,12 @@ describe('saveEncompassLoan', () => {
 
         const entry = {
             Detail: JSON.stringify(event.detail),
-            DetailType: "Loan",
+            DetailType: "lambda",
             EventBusName: `${process.env.ENV}-credit-plus`,
-            Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
+            Source: 'Lambda Function Invocation Result - Success',
+            Resources: [
+                `arn:aws:lambda:${process.env.REGION}:${process.env.ACCOUNT_ID}:function:cp-create-udn-order-${process.env.ENV}-createUdnOrder:$LATEST`
+            ]
         }
 
         await eventBridgeClient.send(new PutEventsCommand({
