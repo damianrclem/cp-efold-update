@@ -81,11 +81,9 @@ describe('eFolderUDNReportUpload', () => {
             attempts = attempts + 1;
         }
 
-        console.log(`attempts: ${attempts}`);
-        console.log(loanDocuments);
-
         const loanDocument = getLoanDocumentByTitle(loanDocuments, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
         expect(loanDocument).toBeTruthy();
+        expect(loanDocument?.attachments.length).toBeGreaterThan(0);
 
         await deleteLoan(id);
         await deleteItem({
