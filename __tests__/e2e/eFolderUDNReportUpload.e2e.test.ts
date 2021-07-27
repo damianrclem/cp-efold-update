@@ -60,7 +60,7 @@ describe('eFolderUDNReportUpload', () => {
         const entry = {
             Detail: JSON.stringify(event.detail),
             DetailType: "Loan",
-            EventBusName: `${process.env.ENV}-encompass`,
+            EventBusName: `${process.env.ENV}-credit-plus`,
             Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
         }
         console.log(entry);
