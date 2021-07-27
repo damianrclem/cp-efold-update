@@ -19,6 +19,11 @@ custom:
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
   cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
+  creditPlusApiBaseUrl:
+    prod: https://creditplus-api-proxy.rmtg.io
+    stage: https://creditplus-api-proxy.stagerm.io
+    dev: https://creditplus-api-proxy.devrm.io
+    pr: https://creditplus-api-proxy.prrm.io
 
 provider:
   name: aws
@@ -37,6 +42,17 @@ provider:
     ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassPassword}}"
     ENCOMPASS_INSTANCE: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassInstance}}"
     ENCOMPASS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassApiKey}}"
+    CREDIT_PLUS_API_BASE_URL: ${self:custom.creditPlusApiBaseUrl.${self:custom.stage}}
+    CREDIT_PLUS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiKey}}"
+    CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
+    CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
+    TABLE_NAME: ${self:custom.tableName}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dyanmodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
 functions:
   eFolderUDNReportUpload:
@@ -47,17 +63,21 @@ functions:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
             source:
-              - "lambda"
+              - "com.revolutionmortgage.encompass.ee-loan-hooks"
             detail-type:
               - "Loan"
             detail:
-              event:
-                - "Lambda Function Invocation Result - Succeeded"
-            resources:
-              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-getOrders"
+              eventType:
+                - "customfield-changed"
+              loan:
+                id:
+                  - anything-but: ""
+                fields:
+                  'CX.CTC.AUDIT1':
+                    - anything-but: ""
+    
 
 resources:
-  - ${file(./resources/alarms.yml)}
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
 
 plugins:

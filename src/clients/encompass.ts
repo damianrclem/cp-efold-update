@@ -2,9 +2,7 @@ import get from 'lodash/get';
 import qs from 'qs';
 import { LoggerError } from '@revolutionmortgage/rm-logger';
 import axios, { AxiosResponse, Method } from 'axios';
-import { UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
-
-const RM_CLIENT = 'cp-efolder-upload';
+import { RM_CLIENT, UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
 
 export class EncompassClient_EnvironmentConfigurationError extends LoggerError {
     constructor(message: string, data?: any) {
@@ -188,4 +186,39 @@ export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer
             'Content-Type': "application/pdf"
         }
     });
+}
+
+/**
+ * Creates a loan
+ * @param {Object} params - The params needed to created the loan
+ * @param {string} params.loanFolder - The name of the folder to create the loan in
+ * @param {Object[]} params.applications - The applications on the loan
+ * @param {Object} params.applications[].borrower - The borrower on the application
+ * @param {string} params.applications[].borrower.FirstName - The first name of the borrower
+ * @param {string} params.applications[].borrower.LastName - The last name of the borrower
+ * @param {string} params.applications[].borrower.TaxIdentificationNumber - The tax id of the borrower (IE, an SSN)
+ * @returns {Promise<AxiosResponse<any>>} The create loan response
+ */
+export const createLoan = async (params: {
+    loanFolder: string
+    applications: Array<{
+        borrower: {
+            FirstName: string
+            LastName: string
+            TaxIdentificationIdentifier: string
+        }
+    }>
+}): Promise<AxiosResponse<any>> => {
+    return await callApi('post', `/encompass/v3/loans?loanFolder=${params.loanFolder}&view=id`, {
+        applications: params.applications,
+    });
+}
+
+/**
+ * Deletes a loan
+ * @param {string} loanId - The id of the loan
+ * @returns {Promise<AxiosResponse<any>>} The delete loan response
+ */
+export const deleteLoan = async (loanId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('delete', `/encompass/v3/loans/${loanId}`)
 }
