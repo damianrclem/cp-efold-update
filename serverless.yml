@@ -46,6 +46,7 @@ provider:
     CREDIT_PLUS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiKey}}"
     CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
     CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
+    TABLE_NAME: ${self:custom.tableName}
 
 functions:
   eFolderUDNReportUpload:
