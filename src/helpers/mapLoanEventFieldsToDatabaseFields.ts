@@ -9,6 +9,7 @@ interface LoanItem {
     CoborrowerFirstName: string;
     CoborrowerLastName: string;
     CoborrowerSSN: string;
+    VendorOrderIdentifier: string
 }
 
 /**
@@ -24,6 +25,7 @@ export const mapLoanEventFieldsToDatabaseFields = (event: Event): LoanItem => {
         BorrowerSSN: get(event, 'detail.responsePayload.detail.borrowerSsn'),
         CoborrowerFirstName: get(event, 'detail.responsePayload.detail.coBorrowerFirstName'),
         CoborrowerLastName: get(event, 'detail.responsePayload.detail.coBorrowerLastName'),
-        CoborrowerSSN: get(event, 'detail.responsePayload.detail.coBorrowerSsn')
+        CoborrowerSSN: get(event, 'detail.responsePayload.detail.coBorrowerSsn'),
+        VendorOrderIdentifier: get(event, 'detail.responsePayload.detail.vendorOrderIdentifier')
     }
 }

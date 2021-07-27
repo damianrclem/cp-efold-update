@@ -21,6 +21,7 @@ describe('mapLoanEventFieldsToDatabaseFields', () => {
                         'coBorrowerFirstName': 'different',
                         'coBorrowerLastName': 'value',
                         'coBorrowerSsn': 'than they are',
+                        'vendorOrderIdentifier': 'blah'
                     }
                 }
             }
@@ -36,6 +37,7 @@ describe('mapLoanEventFieldsToDatabaseFields', () => {
             CoborrowerFirstName: 'different',
             CoborrowerLastName: 'value',
             CoborrowerSSN: 'than they are',
+            VendorOrderIdentifier: 'blah'
         })
     })
 })

@@ -15,7 +15,7 @@ interface Detail {
     }
     responsePayload: {
         detail: {
-            venderOrderIdentifier: string;
+            vendorOrderIdentifier: string;
             borrowerFirstName: string;
             borrowerLastName: string;
             borrowerSsn: string;
@@ -54,10 +54,11 @@ const validateEventPayload = (event: Event, pathsToRequiredParams: Array<string>
  */
 export const handler: Handler = async (event: Event) => {
     validateEventPayload(event, [
-        "detail.loan.id",
-        "detail.loan.fields['4000']",
-        "detail.loan.fields['4002']",
-        "detail.loan.fields['65']",
+        "detail.requestPayload.detail.loan.id",
+        "detail.responsePayload.detail.borrowerFirstName",
+        "detail.responsePayload.detail.borrowerLastName",
+        "detail.responsePayload.detail.borrowerSsn",
+        "detail.responsePayload.detail.vendorOrderIdentifier"
     ])
 
     const loanItem = mapLoanEventFieldsToDatabaseFields(event);
