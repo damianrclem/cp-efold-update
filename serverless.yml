@@ -62,9 +62,9 @@ functions:
             detail:
               eventType:
                 - "customfield-changed"
-              loan:
-                id:
-                  - anything-but: ""
+              # loan:
+              #   id:
+              #     - anything-but: ""
                 # fields:
                 #   'CX.CTC.AUDIT1':
                 #     - anything-but: ""
