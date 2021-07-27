@@ -1,3 +1,6 @@
+import get from "lodash/get"
+import { Event } from "../functions/saveEncompassLoan"
+
 interface LoanItem {
     Id: string;
     BorrowerFirstName: string;
@@ -13,14 +16,14 @@ interface LoanItem {
  * @param loan - The loan from the event payload
  * @returns {LoanItem} The loan to save to the database
  */
-export const mapLoanEventFieldsToDatabaseFields = (loan: { [key: string]: any }): LoanItem => {
+export const mapLoanEventFieldsToDatabaseFields = (event: Event): LoanItem => {
     return {
-        Id: loan.id,
-        BorrowerFirstName: loan.fields['4000'],
-        BorrowerLastName: loan.fields['4002'],
-        BorrowerSSN: loan.fields['65'],
-        CoborrowerFirstName: loan.fields['4004'],
-        CoborrowerLastName: loan.fields['4006'],
-        CoborrowerSSN: loan.fields['97']
+        Id: get(event, 'detail.requestPayload.detail.loan.id'),
+        BorrowerFirstName: get(event, 'detail.responsePayload.detail.borrowerFirstName'),
+        BorrowerLastName: get(event, 'detail.responsePayload.detail.borrowerLastName'),
+        BorrowerSSN: get(event, 'detail.responsePayload.detail.borrowerSsn'),
+        CoborrowerFirstName: get(event, 'detail.responsePayload.detail.coBorrowerFirstName'),
+        CoborrowerLastName: get(event, 'detail.responsePayload.detail.coBorrowerLastName'),
+        CoborrowerSSN: get(event, 'detail.responsePayload.detail.coBorrowerSsn')
     }
 }

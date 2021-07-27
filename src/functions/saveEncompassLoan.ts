@@ -6,15 +6,22 @@ import { mapLoanEventFieldsToDatabaseFields } from "../helpers/mapLoanEventField
 
 interface Detail {
     eventType: string
-    loan: {
-        id: string;
-        fields: {
-            '4000': string; // borrower first name
-            '4002': string; // borrower last name
-            '65': string; // borrower tax id
-            '4004': string; // coborrower first name
-            '4006': string; // coborrower last name
-            '97': string; // coborrower tax id
+    requestPayload: {
+        detail: {
+            loan: {
+                id: string;
+            }
+        }
+    }
+    responsePayload: {
+        detail: {
+            venderOrderIdentifier: string;
+            borrowerFirstName: string;
+            borrowerLastName: string;
+            borrowerSsn: string;
+            coBorrowerFirstName: string;
+            coBorrowerLastName: string;
+            coBorrowerSsn: string;
         }
     }
 }
@@ -53,7 +60,7 @@ export const handler: Handler = async (event: Event) => {
         "detail.loan.fields['65']",
     ])
 
-    const loanItem = mapLoanEventFieldsToDatabaseFields(event.detail.loan);
+    const loanItem = mapLoanEventFieldsToDatabaseFields(event);
 
     await putItem({
         PK: `LOAN#${loanItem.Id}`,

@@ -1,20 +1,32 @@
+// @ts-nocheck
+
 import { mapLoanEventFieldsToDatabaseFields } from "../../../src/helpers/mapLoanEventFieldsToDatabaseFields";
 
 describe('mapLoanEventFieldsToDatabaseFields', () => {
     test('it maps correctly', () => {
-        const loan = {
-            id: 'my id',
-            fields: {
-                '4000': 'i',
-                '4002': 'am',
-                '65': 'a',
-                '4004': 'different',
-                '4006': 'value',
-                '97': 'than they are',
+        const event = {
+            detail: {
+                requestPayload: {
+                    detail: {
+                        loan: {
+                            id: "my id",
+                        }
+                    }
+                },
+                responsePayload: {
+                    detail: {
+                        'borrowerFirstName': 'i',
+                        'borrowerLastName': 'am',
+                        'borrowerSsn': 'a',
+                        'coBorrowerFirstName': 'different',
+                        'coBorrowerLastName': 'value',
+                        'coBorrowerSsn': 'than they are',
+                    }
+                }
             }
         }
 
-        const result = mapLoanEventFieldsToDatabaseFields(loan)
+        const result = mapLoanEventFieldsToDatabaseFields(event)
 
         expect(result).toEqual({
             Id: 'my id',
