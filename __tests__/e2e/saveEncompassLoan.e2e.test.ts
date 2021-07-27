@@ -87,7 +87,7 @@ describe('saveEncompassLoan', () => {
             EventBusName: `${process.env.ENV}-credit-plus`,
             Source: 'Lambda Function Invocation Result - Success',
             Resources: [
-                `arn:aws:lambda:${process.env.REGION}:${process.env.ACCOUNT_ID}:function:cp-create-udn-order-${process.env.ENV}-createUdnOrder:$LATEST`
+                `arn:aws:lambda:us-east-2:709027452869:function:cp-create-udn-order-dev-createUdnOrder:$LATEST`
             ]
         }
 
