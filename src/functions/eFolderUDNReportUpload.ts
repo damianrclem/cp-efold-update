@@ -9,13 +9,7 @@ import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
 import { getUDNReport } from '../helpers/getUDNReport';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 import { loanAuditFieldsHaveChanged as haveLoanAuditFieldsChanged } from '../helpers/haveLoanAuditFieldsChanged';
-
-export class InvalidParamsError extends LoggerError {
-    constructor(message: string, data?: any) {
-        super(message, data);
-    }
-}
-
+import { InvalidParamsError } from '../common/errors';
 export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     constructor(message: string, data?: any) {
         super(message, data)

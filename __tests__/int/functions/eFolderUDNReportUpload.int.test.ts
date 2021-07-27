@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { deleteItem, putItem } from "../../../src/common/database";
-import { handler, InvalidParamsError, LoanNotFoundError } from "../../../src/functions/eFolderUDNReportUpload"
+import { handler, InvalidParamsError, LoanNotFoundError } from "../../../src/common/errors"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
 import { AUDIT_FIELDS } from "../../../src/common/constants";
 
