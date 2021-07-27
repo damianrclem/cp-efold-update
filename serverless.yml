@@ -75,7 +75,19 @@ functions:
                 fields:
                   'CX.CTC.AUDIT1':
                     - anything-but: ""
-    
+  saveEncompassLoan:
+    handler: src/functions/saveEncompassLoan.handler
+    timeout: 30
+    events:
+      - eventBridge:
+          eventBus: ${self:custom.creditPlusEventBusArn}
+          pattern:
+            source:
+              - "Lambda Function Invocation Result - Success"
+            detail-type:
+              - "lambda"
+            resources:
+              - arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-create-udn-order-${self:custom.stage}-createUdnOrder:$LATEST
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
