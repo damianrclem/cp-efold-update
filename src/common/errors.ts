@@ -1,7 +1,7 @@
 import { LoggerError } from "@revolutionmortgage/rm-logger";
 
-export class InvalidParamsError extends LoggerError {
-    constructor(message: string, data?: any) {
-        super(message, data);
+export class InvalidEventParamsError extends LoggerError {
+    constructor(param: string, data?: any) {
+        super(`Required parameter ${param} is missing on event payload`, data);
     }
 }

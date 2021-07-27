@@ -1,20 +1,21 @@
 // @ts-nocheck
 
 import { deleteItem, putItem } from "../../../src/common/database";
-import { handler, InvalidParamsError, LoanNotFoundError } from "../../../src/common/errors"
+import { InvalidEventParamsError } from "../../../src/common/errors";
+import { handler, LoanNotFoundError } from "../../../src/functions/eFolderUDNReportUpload"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
 import { AUDIT_FIELDS } from "../../../src/common/constants";
 
 const testTimeout = 30000; // 30 seconds. Matches the timeout configurated for this lambda
 
 describe('eFolderUDNReportUpload', () => {
-    test('throws InvalidParamsError if event is missing loan id', async () => {
+    test('throws InvalidEventParamsError if event is missing loan id', async () => {
         const invalidHandler = handler({}, {}, () => { });
-        await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
-        await expect(invalidHandler).rejects.toThrow("loan id missing on event detail");
+        await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
+        await expect(invalidHandler).rejects.toThrow("Required parameter detail.loan.id is missing on event payload");
     }, testTimeout)
 
-    test('throws InvalidParamsError if event is missing loan fields', async () => {
+    test('throws InvalidEventParamsError if event is missing loan fields', async () => {
         const invalidHandler = handler({
             detail: {
                 loan: {
@@ -22,8 +23,8 @@ describe('eFolderUDNReportUpload', () => {
                 }
             }
         }, {}, () => { });
-        await expect(invalidHandler).rejects.toThrow(InvalidParamsError);
-        await expect(invalidHandler).rejects.toThrow("fields missing on event detail");
+        await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
+        await expect(invalidHandler).rejects.toThrow("Required parameter detail.loan.fields is missing on event payload");
     }, testTimeout)
 
     test('throws LoanNotFoundError loan is not found', async () => {

@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { handler, InvalidParamsError, LoanDocumentForUDNReportsNotFoundError, LoanNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
+import { handler, LoanDocumentForUDNReportsNotFoundError, LoanNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
+import { InvalidEventParamsError } from '../../../src/common/errors';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
 import { getLoanDocumentByTitle } from "../../../src/helpers/getLoanDocumentByTitle";
@@ -35,14 +36,14 @@ jest.mock("../../../src/common/database", () => ({
 }))
 
 describe('eFolderUDNReportUpload', () => {
-    test('it throws an InvalidParamsError if the loanId is not on the event detail payload', async () => {
+    test('it throws an InvalidEventParamsError if the loanId is not on the event detail payload', async () => {
         const handlerWithNoLoanId = handler({}, {}, () => { });
 
-        await expect(handlerWithNoLoanId).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoLoanId).rejects.toThrow('loan id missing on event detail');
+        await expect(handlerWithNoLoanId).rejects.toThrow(InvalidEventParamsError);
+        await expect(handlerWithNoLoanId).rejects.toThrow('Required parameter detail.loan.id is missing on event payload');
     });
 
-    test('it throws an InvalidParamsError if fields is not on the event detail payload', async () => {
+    test('it throws an InvalidEventParamsError if fields is not on the event detail payload', async () => {
         const handlerWithNoFields = handler({
             detail: {
                 loan: {
@@ -51,8 +52,8 @@ describe('eFolderUDNReportUpload', () => {
             }
         }, {}, () => { })
 
-        await expect(handlerWithNoFields).rejects.toThrow(InvalidParamsError);
-        await expect(handlerWithNoFields).rejects.toThrow('fields missing on event detail');
+        await expect(handlerWithNoFields).rejects.toThrow(InvalidEventParamsError);
+        await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.loan.fields is missing on event payload');
     });
 
     test('it throws a LoanNotFoundError if no loan was found in the database', async () => {
