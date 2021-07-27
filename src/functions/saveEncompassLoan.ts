@@ -1,6 +1,8 @@
 import { EventBridgeEvent, EventBridgeHandler } from "aws-lambda";
 import get from "lodash/get";
+import { putItem } from "../common/database";
 import { InvalidEventParamsError } from "../common/errors";
+import { mapLoanEventFieldsToDatabaseFields } from "../helpers/mapLoanEventFieldsToDatabaseFields";
 
 interface Detail {
     eventType: string
@@ -37,4 +39,12 @@ export const handler: Handler = async (event: Event) => {
         "detail.loan.fields['4002']",
         "detail.loan.fields['65']",
     ])
+
+    const loanItem = mapLoanEventFieldsToDatabaseFields(event.detail.loan);
+
+    await putItem({
+        PK: `LOAN#${loanItem.Id}`,
+        SK: `LOAN#${loanItem.Id}`,
+        ...loanItem
+    })
 }
