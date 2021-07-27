@@ -2,6 +2,8 @@ import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge
 import { getItem } from "../../src/common/database";
 import wait from "./wait";
 
+const testTimeout = 120000; // 2 minutes.
+
 describe('saveEncompassLoan', () => {
     test('it saves a loan to the database', async () => {
         const event = {
@@ -50,7 +52,7 @@ describe('saveEncompassLoan', () => {
         expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.borrowerFirstName);
         expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.borrowerLastName);
         expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.borrowerSsn);
-    });
+    }, testTimeout);
 
     test('it saves a loan with a coborrower to the database', async () => {
         const event = {
@@ -105,5 +107,5 @@ describe('saveEncompassLoan', () => {
         expect(result.Item?.CoborrowerFirstName).toEqual(event.detail.responsePayload.coBorrowerFirstName);
         expect(result.Item?.CoborrowerLastName).toEqual(event.detail.responsePayload.coBorrowerLastName);
         expect(result.Item?.CoborrowerSSN).toEqual(event.detail.responsePayload.coBorrowerSsn);
-    })
+    }, testTimeout)
 })
