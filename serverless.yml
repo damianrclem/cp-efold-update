@@ -48,7 +48,7 @@ provider:
     CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
     TABLE_NAME: ${self:custom.tableName}
     REGION: '#{AWS::Region}'
-    ACCOUNT_ID: '#{AWS::AccountId}'
+    AWS_ACCOUNT_ID: '#{AWS::AccountId}'
 
 functions:
   eFolderUDNReportUpload:
