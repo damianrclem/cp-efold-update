@@ -1,17 +1,18 @@
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
-import { getItem } from "../../src/common/database";
+import { deleteItem, getItem } from "../../src/common/database";
 import wait from "./wait";
 
 const testTimeout = 120000; // 2 minutes.
 
 describe('saveEncompassLoan', () => {
     test('it saves a loan to the database', async () => {
+        const loanId = new Date().getMinutes();
         const event = {
             detail: {
                 requestPayload: {
                     detail: {
                         loan: {
-                            id: "loanId"
+                            id: loanId
                         }
                     }
                 },
@@ -48,8 +49,8 @@ describe('saveEncompassLoan', () => {
         await wait(10000);
 
         const result = await getItem({
-            PK: `LOAN#${event.detail.requestPayload.detail.loan.id}`,
-            SK: `LOAN#${event.detail.requestPayload.detail.loan.id}`
+            PK: `LOAN#${loanId}`,
+            SK: `LOAN#${loanId}`,
         })
 
         expect(result.Item).toBeTruthy();
@@ -58,15 +59,21 @@ describe('saveEncompassLoan', () => {
         expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.detail.borrowerFirstName);
         expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.detail.borrowerLastName);
         expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.detail.borrowerSsn);
+
+        await deleteItem({
+            PK: `LOAN#${loanId}`,
+            SK: `LOAN#${loanId}`,
+        })
     }, testTimeout);
 
     test('it saves a loan with a coborrower to the database', async () => {
+        const loanId = new Date().getMinutes();
         const event = {
             detail: {
                 requestPayload: {
                     detail: {
                         loan: {
-                            id: "loanId"
+                            id: loanId,
                         }
                     }
                 },
@@ -107,8 +114,8 @@ describe('saveEncompassLoan', () => {
         await wait(10000);
 
         const result = await getItem({
-            PK: `LOAN#${event.detail.requestPayload.detail.loan.id}`,
-            SK: `LOAN#${event.detail.requestPayload.detail.loan.id}`
+            PK: `LOAN#${loanId}`,
+            SK: `LOAN#${loanId}`,
         })
 
         expect(result.Item).toBeTruthy();
@@ -120,5 +127,10 @@ describe('saveEncompassLoan', () => {
         expect(result.Item?.CoborrowerFirstName).toEqual(event.detail.responsePayload.detail.coBorrowerFirstName);
         expect(result.Item?.CoborrowerLastName).toEqual(event.detail.responsePayload.detail.coBorrowerLastName);
         expect(result.Item?.CoborrowerSSN).toEqual(event.detail.responsePayload.detail.coBorrowerSsn);
+
+        await deleteItem({
+            PK: `LOAN#${loanId}`,
+            SK: `LOAN#${loanId}`,
+        })
     }, testTimeout)
 })
