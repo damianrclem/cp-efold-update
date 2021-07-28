@@ -17,6 +17,13 @@ env:
   ENCOMPASS_CLIENT_SECRET: ${{ secrets.DEV_ENCOMPASS_CLIENT_SECRET }}
   ENCOMPASS_SMART_CLIENT_USER: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_USER }}
   ENCOMPASS_SMART_CLIENT_PASSWORD: ${{ secrets.DEV_ENCOMPASS_SMART_CLIENT_PASSWORD }}
+  ENCOMPASS_API_KEY: ${{ secrets.DEV_ENCOMPASS_API_KEY }}
+  ENCOMPASS_INSTANCE: ${{ secrets.DEV_ENCOMPASS_INSTANCE }}
+  CREDIT_PLUS_API_BASE_URL: https://creditplus-api-proxy.devrm.io
+  CREDIT_PLUS_API_KEY: ${{ secrets.DEV_CREDIT_PLUS_API_KEY }}
+  CREDIT_PLUS_API_USERNAME: ${{ secrets.DEV_CREDIT_PLUS_API_USERNAME }}
+  CREDIT_PLUS_API_PASSWORD: ${{ secrets.DEV_CREDIT_PLUS_API_PASSWORD }}
+  TABLE_NAME: dev-cp-efolder-upload
 
 jobs:
   build:
@@ -84,3 +91,6 @@ jobs:
 
       - name: "deploy"
         uses: ./.github/actions/deploy
+
+      - name: "run e2e tests"
+        uses: ./.github/actions/e2e-test

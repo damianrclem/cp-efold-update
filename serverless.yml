@@ -14,10 +14,18 @@ custom:
     stage: https://elliemae-api-proxy.stagerm.io
     dev: https://elliemae-api-proxy.devrm.io
     pr: https://elliemae-api-proxy.prrm.io
+  tableName: ${self:custom.stage}-${self:service}
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   replayQueueArn: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay"
   replayMaxCount: 20 # This is when messages quit replaying and go to the DLQ
+  cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
+  cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
+  creditPlusApiBaseUrl:
+    prod: https://creditplus-api-proxy.rmtg.io
+    stage: https://creditplus-api-proxy.stagerm.io
+    dev: https://creditplus-api-proxy.devrm.io
+    pr: https://creditplus-api-proxy.prrm.io
 
 provider:
   name: aws
@@ -30,12 +38,19 @@ provider:
   environment:
     REGEN_CF_VARS: v1 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
-    ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:id}}"
-    ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:secret}}"
-    ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:user}}"
-    ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:EncompassClient:SecretString:password}}"
     REGION: ${self:provider.region}
     CP_EVENT_BUS: ${self:custom.creditPlusEventBusName}
+    ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientId}}"
+    ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientSecret}}"
+    ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassUser}}"
+    ENCOMPASS_SMART_CLIENT_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassPassword}}"
+    ENCOMPASS_INSTANCE: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassInstance}}"
+    ENCOMPASS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassApiKey}}"
+    CREDIT_PLUS_API_BASE_URL: ${self:custom.creditPlusApiBaseUrl.${self:custom.stage}}
+    CREDIT_PLUS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiKey}}"
+    CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
+    CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
+    TABLE_NAME: ${self:custom.tableName}
 
 functions:
   eFolderUDNReportUpload:
@@ -46,40 +61,74 @@ functions:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
             source:
-              - "lambda"
+              - "com.revolutionmortgage.encompass.ee-loan-hooks"
             detail-type:
               - "Loan"
             detail:
-              event:
-                - "Lambda Function Invocation Result - Succeeded"
-            resources:
-              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-polling-${self:custom.stage}-getOrders"
-      - eventBridge:
-          eventBus: ${self:custom.creditPlusEventBusArn}
-          pattern:
-            source:
-              - "lambda"
-            detail-type:
-              - "Loan"
-            detail:
-              event:
-                - "Lambda Function Invocation Result - Failure"
-            resources:
-              - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+              eventType:
+                - "customfield-changed"
+              loan:
+                id:
+                  - anything-but: ""
+                fields:
+                  'CX.CTC.AUDIT1':
+                    - anything-but: ""
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
     destinations:
       onSuccess: ${self:custom.creditPlusEventBusArn}
       onFailure: ${self:custom.creditPlusEventBusArn}
-  
+
   eFolderUDNReportUploadReplay:
     handler: src/functions/eFolderUDNReportUploadReplay.handler
     events:
       - sqs: ${self:custom.replayQueueArn}
 
+  saveEncompassLoan:
+    handler: src/functions/saveEncompassLoan.handler
+    timeout: 30
+    events:
+      - eventBridge:
+          eventBus: ${self:custom.creditPlusEventBusArn}
+          pattern:
+            source:
+              - "Lambda Function Invocation Result - Success"
+            detail-type:
+              - "lambda"
+            resources:
+              - arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-create-udn-order-${self:custom.stage}-createUdnOrder:$LATEST
+            detail:
+              requestPayload:
+                detail:
+                  loan:
+                    id:
+                      - anything-but: ""
+              responsePayload:
+                detail:
+                  borrowerFirstName:
+                    - anything-but: ""
+                  borrowerLastName:
+                    - anything-but: ""
+                  borrowerSsn:
+                    - anything-but: ""
+                  vendorOrderIdentifier:
+                    - anything-but: ""
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+
 resources:
-  - ${file(./resources/alarms.yml)}
+  - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
   - ${file(./resources/replayQueue.yml)}
   - ${file(./resources/deadLetterQueue.yml)}
 
 plugins:
   - serverless-plugin-typescript
   - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function

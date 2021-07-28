@@ -4,6 +4,9 @@ interface LoanDocument {
     application: {
         entityName: string;
     }
+    attachments: Array<{
+        id: string;
+    }>;
 }
 
 /**

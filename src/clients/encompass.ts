@@ -2,9 +2,7 @@ import get from 'lodash/get';
 import qs from 'qs';
 import { LoggerError } from '@revolutionmortgage/rm-logger';
 import axios, { AxiosResponse, Method } from 'axios';
-import { UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../constants';
-
-const RM_CLIENT = 'cp-efolder-upload';
+import { RM_CLIENT, UDN_REPORTS_E_FOLDER_DOCUMENT_DESCRIPTION, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE } from '../common/constants';
 
 export class EncompassClient_EnvironmentConfigurationError extends LoggerError {
     constructor(message: string, data?: any) {
@@ -25,12 +23,20 @@ const getBaseUrl = (): string => {
     return baseUrl as string;
 }
 
+const getApiKey = (): string => {
+    const apiKey = get(process, 'env.ENCOMPASS_API_KEY');
+    if (!apiKey) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_API_KEY');
+
+    return apiKey as string;
+}
+
 /**
  * Retrieves OAuth Bearer token from Encompass API
  * @returns {Promise<string>}
  */
 const getToken = async (): Promise<string> => {
     const baseUrl = getBaseUrl();
+    const apiKey = getApiKey();
 
     const smartClientUser = get(process, 'env.ENCOMPASS_SMART_CLIENT_USER');
     if (!smartClientUser) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_SMART_CLIENT_USER');
@@ -44,12 +50,15 @@ const getToken = async (): Promise<string> => {
     const clientSecret = get(process, 'env.ENCOMPASS_CLIENT_SECRET');
     if (!clientSecret) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_CLIENT_SECRET');
 
+    const instance = get(process, 'env.ENCOMPASS_INSTANCE');
+    if (!instance) throw new EncompassClient_EnvironmentConfigurationError('Environment missing ENCOMPASS_INSTANCE');
+
     const response = await axios({
         method: 'post',
         url: `${baseUrl}/oauth2/v1/token`,
         data: qs.stringify({
             grant_type: 'password',
-            username: `${smartClientUser}@encompass:be11207045`,
+            username: `${smartClientUser}@encompass:${instance}`,
             password: smartClientPassword,
             client_id: clientId,
             client_secret: clientSecret,
@@ -57,6 +66,7 @@ const getToken = async (): Promise<string> => {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'x-rm-client': RM_CLIENT,
+            'x-api-key': apiKey,
         },
     });
 
@@ -82,6 +92,7 @@ const callApi = async (
 ): Promise<AxiosResponse<any>> => {
     const token = await getToken();
     const baseUrl = getBaseUrl();
+    const apiKey = getApiKey();
 
     const url = `${baseUrl}${endpoint}`;
     return await axios({
@@ -91,6 +102,7 @@ const callApi = async (
         headers: {
             'x-rm-client': RM_CLIENT,
             'Authorization': `Bearer ${token}`,
+            'x-api-key': apiKey,
         }
     });
 }
@@ -159,12 +171,54 @@ export const createLoanAttachmentUrl = async (loanId: string, loanDocumentId: st
  * @param {Buffer} file - The file you want to upload
  * @returns {Promise<AxiosResponse<any>>}
  */
-export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer): Promise<AxiosResponse<any>> => {
-    const token = getToken();
+export const uploadAttachment = async (uploadAttachmentUrl: string, file: Buffer, authorizationHeader?: string): Promise<AxiosResponse<any>> => {
+    let authorizationValue: string;
+    if (authorizationHeader) {
+        authorizationValue = authorizationHeader;
+    } else {
+        const token = await getToken();
+        authorizationValue = `Bearer ${token}`;
+    }
 
     return await axios.put(uploadAttachmentUrl, file, {
         headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': authorizationValue,
+            'Content-Type': "application/pdf"
         }
     });
+}
+
+/**
+ * Creates a loan
+ * @param {Object} params - The params needed to created the loan
+ * @param {string} params.loanFolder - The name of the folder to create the loan in
+ * @param {Object[]} params.applications - The applications on the loan
+ * @param {Object} params.applications[].borrower - The borrower on the application
+ * @param {string} params.applications[].borrower.FirstName - The first name of the borrower
+ * @param {string} params.applications[].borrower.LastName - The last name of the borrower
+ * @param {string} params.applications[].borrower.TaxIdentificationNumber - The tax id of the borrower (IE, an SSN)
+ * @returns {Promise<AxiosResponse<any>>} The create loan response
+ */
+export const createLoan = async (params: {
+    loanFolder: string
+    applications: Array<{
+        borrower: {
+            FirstName: string
+            LastName: string
+            TaxIdentificationIdentifier: string
+        }
+    }>
+}): Promise<AxiosResponse<any>> => {
+    return await callApi('post', `/encompass/v3/loans?loanFolder=${params.loanFolder}&view=id`, {
+        applications: params.applications,
+    });
+}
+
+/**
+ * Deletes a loan
+ * @param {string} loanId - The id of the loan
+ * @returns {Promise<AxiosResponse<any>>} The delete loan response
+ */
+export const deleteLoan = async (loanId: string): Promise<AxiosResponse<any>> => {
+    return await callApi('delete', `/encompass/v3/loans/${loanId}`)
 }
