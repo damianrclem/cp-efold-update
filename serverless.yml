@@ -47,12 +47,8 @@ provider:
     CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
     CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
     TABLE_NAME: ${self:custom.tableName}
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:GetItem
-        - dyanmodb:PutItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+    REGION: '#{AWS::Region}'
+    AWS_ACCOUNT_ID: '#{AWS::AccountId}'
 
 functions:
   eFolderUDNReportUpload:
@@ -75,7 +71,47 @@ functions:
                 fields:
                   'CX.CTC.AUDIT1':
                     - anything-but: ""
-    
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+
+  saveEncompassLoan:
+    handler: src/functions/saveEncompassLoan.handler
+    timeout: 30
+    events:
+      - eventBridge:
+          eventBus: ${self:custom.creditPlusEventBusArn}
+          pattern:
+            source:
+              - "Lambda Function Invocation Result - Success"
+            detail-type:
+              - "lambda"
+            resources:
+              - arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-create-udn-order-${self:custom.stage}-createUdnOrder:$LATEST
+            detail:
+              requestPayload:
+                detail:
+                  loan:
+                    id:
+                      - anything-but: ""
+              responsePayload:
+                detail:
+                  borrowerFirstName:
+                    - anything-but: ""
+                  borrowerLastName:
+                    - anything-but: ""
+                  borrowerSsn:
+                    - anything-but: ""
+                  vendorOrderIdentifier:
+                    - anything-but: ""
+    iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
@@ -83,3 +119,4 @@ resources:
 plugins:
   - serverless-plugin-typescript
   - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function

@@ -9,13 +9,7 @@ import { getLoanDocumentByTitle } from '../helpers/getLoanDocumentByTitle';
 import { getUDNReport } from '../helpers/getUDNReport';
 import { uploadUDNReportToEFolder } from '../helpers/uploadUDNReportToEFolder';
 import { loanAuditFieldsHaveChanged as haveLoanAuditFieldsChanged } from '../helpers/haveLoanAuditFieldsChanged';
-
-export class InvalidParamsError extends LoggerError {
-    constructor(message: string, data?: any) {
-        super(message, data);
-    }
-}
-
+import { InvalidEventParamsError } from '../common/errors';
 export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     constructor(message: string, data?: any) {
         super(message, data)
@@ -59,12 +53,12 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 export const handler: Handler = async (event: Event): Promise<void> => {
     const loanId = get(event, 'detail.loan.id');
     if (!loanId) {
-        throw new InvalidParamsError("loan id missing on event detail", event);
+        throw new InvalidEventParamsError("detail.loan.id", event);
     }
 
     const fields = get(event, 'detail.loan.fields');
     if (!fields) {
-        throw new InvalidParamsError("fields missing on event detail", event);
+        throw new InvalidEventParamsError("detail.loan.fields", event);
     }
 
     // Get the loan from the database
