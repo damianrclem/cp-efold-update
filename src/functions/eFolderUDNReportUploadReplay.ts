@@ -14,8 +14,6 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
     const eventBus = get(process, 'env.CP_EVENT_BUS');
     if (!eventBus) throw new Error('Environment missing event bus name');
 
-    let events: Promise<PutEventsCommandOutput>[] = [];
-
     const records = get(event, 'Records') ?? [];
 
     const entries: Array<PutEventsRequestEntry> = records.map((record: SQSRecord): PutEventsRequestEntry => {
@@ -48,7 +46,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
         region,
     });
 
-    events.push(client.send(new PutEventsCommand({
+    await client.send(new PutEventsCommand({
         Entries: entries,
-    })))
+    }))
 };
