@@ -54,7 +54,7 @@ describe('saveEncompassLoan', () => {
 
         expect(result.Item).toBeTruthy();
         expect(result.Item?.Id).toEqual(event.detail.requestPayload.detail.loan.id);
-        expect(result.Item?.VendorOrderId).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
+        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
         expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.detail.borrowerFirstName);
         expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.detail.borrowerLastName);
         expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.detail.borrowerSsn);
@@ -113,7 +113,7 @@ describe('saveEncompassLoan', () => {
 
         expect(result.Item).toBeTruthy();
         expect(result.Item?.Id).toEqual(event.detail.requestPayload.detail.loan.id);
-        expect(result.Item?.VendorOrderId).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
+        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
         expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.detail.borrowerFirstName);
         expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.detail.borrowerLastName);
         expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.detail.borrowerSsn);
