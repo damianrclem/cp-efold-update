@@ -14,7 +14,7 @@ interface LoanItem {
 
 /**
  * 
- * @param loan - The loan from the event payload
+ * @param event - The event payload
  * @returns {LoanItem} The loan to save to the database
  */
 export const mapLoanEventFieldsToDatabaseFields = (event: Event): LoanItem => {
