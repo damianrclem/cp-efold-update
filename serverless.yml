@@ -75,7 +75,7 @@ functions:
     - Effect: Allow
       Action:
         - dynamodb:GetItem
-        - dyanmodb:PutItem
+        - dynamodb:PutItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
   saveEncompassLoan:
@@ -110,7 +110,7 @@ functions:
     iamRoleStatements:
     - Effect: Allow
       Action:
-        - dyanmodb:PutItem
+        - dynamodb:PutItem
       Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
 resources:
