@@ -39,6 +39,7 @@
         "@types/uuid": "^8.3.0",
         "@types/xmldom": "^0.1.31",
         "jest": "^26.4.2",
+        "serverless-iam-roles-per-function": "^3.2.0",
         "serverless-plugin-typescript": "^1.1.9",
         "serverless-pseudo-parameters": "^2.5.0",
         "typescript": "^3.9.6"
