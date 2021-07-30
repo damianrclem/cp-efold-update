@@ -19,9 +19,10 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
 
     const eventBridgeClient = new EventBridgeClient({
         region,
-    }); 
+    });
 
-    records.forEach(async (record: SQSRecord): Promise<void> => {
+    for (let index = 0; index < records.length; index++) {
+        const record = records[index];
         const body = get(record, 'body') ?? '{}';
         const event = JSON.parse(body);
 
@@ -57,7 +58,7 @@ export const handler: SQSHandler = async (event: SQSEvent): Promise<any> => {
         // processed. This line removes successfully processed records from the queue so they're not re-processed in
         // the event another record in the batch fails.
         await removeFromQueue(receiptHandler);
-    });
+    }
 };
 /**
  * Clear the message from the queue
