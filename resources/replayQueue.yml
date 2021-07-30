@@ -41,7 +41,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: "Replay"
-      Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-archive-rule
+      Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-archive-rule
       State: "ENABLED"
       EventBusName: ${self:custom.creditPlusEventBusArn}
       EventPattern:
