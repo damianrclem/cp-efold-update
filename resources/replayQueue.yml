@@ -1,0 +1,84 @@
+Resources:
+
+  ReplayQueue1:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay
+      DelaySeconds: 15
+
+  ReplayQueue1Rule1:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Replay"
+      Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-rule 
+      State: "ENABLED"
+      EventBusName: ${self:custom.creditPlusEventBusArn}
+      EventPattern:
+        detail-type:
+          - "Lambda Function Invocation Result - Failure"
+        resources:
+          - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+        source:
+          - "lambda"
+        detail:
+          requestPayload:
+            detail:
+              retries:
+                - exists: false
+                - numeric:
+                  - "<"
+                  - ${self:custom.replayMaxCount}
+      Targets:
+        - Arn: !GetAtt ReplayQueue1.Arn
+          Id: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-queue
+          InputPath: "$.detail.requestPayload"
+
+  # This rule should only ever be used by DLQ archive replays.  Because the events in the archive
+  # have a retries count greater than the replayMaxCount, we cannot use the standard replay queue rule.
+  # This rule enables the DLQ archive to replay the events through the replay queue, bypassing the
+  # retries count check.  The replay-name exists pattern restricts matched events to the archive replay.
+  ReplayQueue1Rule2:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Replay"
+      Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-archive-rule
+      State: "ENABLED"
+      EventBusName: ${self:custom.creditPlusEventBusArn}
+      EventPattern:
+        detail-type:
+          - "Lambda Function Invocation Result - Failure"
+        replay-name:
+          - exists: true
+        resources:
+          - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+        source:
+          - "lambda"
+        detail:
+          requestPayload:
+            detail:
+              retries:
+                - exists: true
+      Targets:
+        - Arn: !GetAtt ReplayQueue1.Arn
+          Id: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay-archive
+          InputPath: "$.detail.requestPayload"
+
+  ReplayQueue1Policy:
+    DependsOn:
+    - ReplayQueue1
+    - ReplayQueue1Rule1
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: ReplayQueue1Policy
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - events.amazonaws.com
+            - sqs.amazonaws.com
+          Action: sqs:SendMessage
+          Resource: !GetAtt ReplayQueue1.Arn
+      Queues:
+      - Ref: ReplayQueue1

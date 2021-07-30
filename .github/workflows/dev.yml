@@ -27,7 +27,7 @@ env:
 
 jobs:
   build:
-    name: "Build"
+    name: "🛠️ Build"
     
     runs-on: ubuntu-18.04
     strategy:
@@ -47,7 +47,7 @@ jobs:
 
   test:
     needs: [ build ]
-    name: "Test"
+    name: "🧪 Test"
     
     runs-on: ubuntu-18.04
     strategy:
@@ -67,7 +67,7 @@ jobs:
 
   deploy:
     needs: [ test ]
-    name: "Deploy to dev"
+    name: "🚀 Deploy to dev"
 
     runs-on: ubuntu-18.04
     strategy:

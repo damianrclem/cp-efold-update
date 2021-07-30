@@ -17,6 +17,8 @@ custom:
   tableName: ${self:custom.stage}-${self:service}
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
+  replayQueueArn: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay"
+  replayMaxCount: 5 # This is when messages quit replaying and go to the DLQ
   cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
   cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
   creditPlusApiBaseUrl:
@@ -24,6 +26,7 @@ custom:
     stage: https://creditplus-api-proxy.stagerm.io
     dev: https://creditplus-api-proxy.devrm.io
     pr: https://creditplus-api-proxy.prrm.io
+  queueName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay
 
 provider:
   name: aws
@@ -36,6 +39,10 @@ provider:
   environment:
     REGEN_CF_VARS: v1 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
+    REGION: ${self:provider.region}
+    ACCOUNT_ID: '#{AWS::AccountId}'
+    QUEUE_NAME: ${self:custom.queueName}
+    CP_EVENT_BUS: ${self:custom.creditPlusEventBusName}
     ENCOMPASS_CLIENT_ID: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientId}}"
     ENCOMPASS_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassClientSecret}}"
     ENCOMPASS_SMART_CLIENT_USER: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:encompassUser}}"
@@ -47,8 +54,6 @@ provider:
     CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
     CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
     TABLE_NAME: ${self:custom.tableName}
-    REGION: '#{AWS::Region}'
-    AWS_ACCOUNT_ID: '#{AWS::AccountId}'
 
 functions:
   eFolderUDNReportUpload:
@@ -72,11 +77,28 @@ functions:
                   'CX.CTC.AUDIT1':
                     - anything-but: ""
     iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+      - Effect: Allow
+        Action:
+          - events:PutEvents
+        Resource: ${self:custom.creditPlusEventBusArn}
+    destinations:
+      onSuccess: ${self:custom.creditPlusEventBusArn}
+      onFailure: ${self:custom.creditPlusEventBusArn}
+
+  eFolderUDNReportUploadReplay:
+    handler: src/functions/eFolderUDNReportUploadReplay.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - events:PutEvents
+        Resource: ${self:custom.creditPlusEventBusArn}
+    events:
+      - sqs: ${self:custom.replayQueueArn}
 
   saveEncompassLoan:
     handler: src/functions/saveEncompassLoan.handler
@@ -108,13 +130,15 @@ functions:
                   vendorOrderIdentifier:
                     - anything-but: ""
     iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:PutItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
+  - ${file(./resources/replayQueue.yml)}
+  - ${file(./resources/deadLetterQueue.yml)}
 
 plugins:
   - serverless-plugin-typescript

@@ -1,0 +1,105 @@
+Resources:
+  DlqQueue1:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq
+      MessageRetentionPeriod: 1209600 # 14 days
+
+  DlqQueue1Rule1:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Dlq"
+      Name: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq-rule
+      State: "ENABLED"
+      EventBusName: ${self:custom.creditPlusEventBusArn}
+      EventPattern:
+        detail-type:
+          - "Lambda Function Invocation Result - Failure"
+        resources:
+          - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+        source:
+          - "lambda"
+        detail:
+          requestPayload:
+            detail:
+              retries:
+                - numeric:
+                    - ">="
+                    - ${self:custom.replayMaxCount}
+      Targets:
+        - Arn: !GetAtt DlqQueue1.Arn
+          Id: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq
+
+  DlqQueue1Policy:
+    DependsOn:
+      - DlqQueue1
+      - DlqQueue1Rule1
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: DlqQueue1Policy
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+                - sqs.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt DlqQueue1.Arn
+      Queues:
+        - Ref: DlqQueue1
+
+  #
+  # Fancy EventBus archive for replaying events that end up in the DLQ
+  #
+  DlqEventsArchive1:
+    Type: "AWS::Events::Archive"
+    Properties:
+      # If you end up deploying an archive with the same name, just add a 2 suffix to the end
+      ArchiveName: ${self:custom.stage}-eFolderUDNReportUpload-dlq # Keep this under 48 characters or you'll get a CF error that's absolutely no help
+      Description: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq
+      EventPattern:
+        detail-type:
+          - "Lambda Function Invocation Result - Failure"
+        resources:
+          - "arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:custom.stage}-eFolderUDNReportUpload:$LATEST"
+        source:
+          - "lambda"
+        detail:
+          requestPayload:
+            detail:
+              retries:
+                - numeric:
+                    - ">="
+                    - ${self:custom.replayMaxCount}
+      RetentionDays: 0 # Keeps events indefinitely
+      SourceArn: "${self:custom.creditPlusEventBusArn}"
+
+  DlqAlarmTopic1:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq-alarm
+      Subscription: 
+        - Endpoint: "development@revolutionmortgage.com"
+          Protocol: "email"
+
+  DlqQueue1Alarm1:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq
+      AlarmDescription: "Alarm if queue depth increases to more than 1 messages"
+      Namespace: "AWS/SQS"
+      MetricName: "ApproximateNumberOfMessagesVisible"
+      Dimensions: 
+        - Name: "QueueName"
+          Value: !GetAtt DlqQueue1.QueueName
+      Statistic: "Sum"
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 0
+      EvaluationPeriods: 1
+      Period: 60
+      TreatMissingData: notBreaching
+      AlarmActions: 
+        - Ref: "DlqAlarmTopic1"
+        - arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:aws-chatbot-${opt:stage}
