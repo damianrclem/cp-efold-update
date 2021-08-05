@@ -17,11 +17,10 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'Bobby',
-                        borrowerLastName: 'Hill',
-                        borrowerSsn: "123",
-                        vendorOrderIdentifier: "098"}
+                    borrowerFirstName: 'Bobby',
+                    borrowerLastName: 'Hill',
+                    borrowerSsn: "123",
+                    vendorOrderIdentifier: "098"
                 }
             }
         }
@@ -55,10 +54,10 @@ describe('saveEncompassLoan', () => {
 
         expect(result.Item).toBeTruthy();
         expect(result.Item?.Id).toEqual(event.detail.requestPayload.detail.loan.id);
-        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
-        expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.detail.borrowerFirstName);
-        expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.detail.borrowerLastName);
-        expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.detail.borrowerSsn);
+        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.vendorOrderIdentifier);
+        expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.borrowerFirstName);
+        expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.borrowerLastName);
+        expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.borrowerSsn);
 
         await deleteItem({
             PK: `LOAN#${loanId}`,
@@ -78,15 +77,13 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'Bobby',
-                        borrowerLastName: 'Hill',
-                        borrowerSsn: "123",
-                        vendorOrderIdentifier: "098",
-                        coBorrowerFirstName: 'bert',
-                        coBorrowerLastName: 'berty',
-                        coBorrowerSsn: 'hello',
-                    }
+                    borrowerFirstName: 'Bobby',
+                    borrowerLastName: 'Hill',
+                    borrowerSsn: "123",
+                    vendorOrderIdentifier: "098",
+                    coBorrowerFirstName: 'bert',
+                    coBorrowerLastName: 'berty',
+                    coBorrowerSsn: 'hello',
                 }
             }
         }
@@ -120,13 +117,13 @@ describe('saveEncompassLoan', () => {
 
         expect(result.Item).toBeTruthy();
         expect(result.Item?.Id).toEqual(event.detail.requestPayload.detail.loan.id);
-        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.detail.vendorOrderIdentifier);
-        expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.detail.borrowerFirstName);
-        expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.detail.borrowerLastName);
-        expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.detail.borrowerSsn);
-        expect(result.Item?.CoborrowerFirstName).toEqual(event.detail.responsePayload.detail.coBorrowerFirstName);
-        expect(result.Item?.CoborrowerLastName).toEqual(event.detail.responsePayload.detail.coBorrowerLastName);
-        expect(result.Item?.CoborrowerSSN).toEqual(event.detail.responsePayload.detail.coBorrowerSsn);
+        expect(result.Item?.VendorOrderIdentifier).toEqual(event.detail.responsePayload.vendorOrderIdentifier);
+        expect(result.Item?.BorrowerFirstName).toEqual(event.detail.responsePayload.borrowerFirstName);
+        expect(result.Item?.BorrowerLastName).toEqual(event.detail.responsePayload.borrowerLastName);
+        expect(result.Item?.BorrowerSSN).toEqual(event.detail.responsePayload.borrowerSsn);
+        expect(result.Item?.CoborrowerFirstName).toEqual(event.detail.responsePayload.coBorrowerFirstName);
+        expect(result.Item?.CoborrowerLastName).toEqual(event.detail.responsePayload.coBorrowerLastName);
+        expect(result.Item?.CoborrowerSSN).toEqual(event.detail.responsePayload.coBorrowerSsn);
 
         await deleteItem({
             PK: `LOAN#${loanId}`,
