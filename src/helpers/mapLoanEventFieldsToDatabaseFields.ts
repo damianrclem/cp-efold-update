@@ -20,12 +20,12 @@ interface LoanItem {
 export const mapLoanEventFieldsToDatabaseFields = (event: Event): LoanItem => {
     return {
         Id: get(event, 'detail.requestPayload.detail.loan.id'),
-        BorrowerFirstName: get(event, 'detail.responsePayload.detail.borrowerFirstName'),
-        BorrowerLastName: get(event, 'detail.responsePayload.detail.borrowerLastName'),
-        BorrowerSSN: get(event, 'detail.responsePayload.detail.borrowerSsn'),
-        CoborrowerFirstName: get(event, 'detail.responsePayload.detail.coBorrowerFirstName'),
-        CoborrowerLastName: get(event, 'detail.responsePayload.detail.coBorrowerLastName'),
-        CoborrowerSSN: get(event, 'detail.responsePayload.detail.coBorrowerSsn'),
-        VendorOrderIdentifier: get(event, 'detail.responsePayload.detail.vendorOrderIdentifier')
+        BorrowerFirstName: get(event, 'detail.responsePayload.borrowerFirstName'),
+        BorrowerLastName: get(event, 'detail.responsePayload.borrowerLastName'),
+        BorrowerSSN: get(event, 'detail.responsePayload.borrowerSsn'),
+        CoborrowerFirstName: get(event, 'detail.responsePayload.coBorrowerFirstName'),
+        CoborrowerLastName: get(event, 'detail.responsePayload.coBorrowerLastName'),
+        CoborrowerSSN: get(event, 'detail.responsePayload.coBorrowerSsn'),
+        VendorOrderIdentifier: get(event, 'detail.responsePayload.vendorOrderIdentifier')
     }
 }
