@@ -1,7 +1,7 @@
 import { LoggerError } from "@revolutionmortgage/rm-logger";
 import axios, { AxiosResponse } from "axios";
 import { get } from "lodash";
-import { RM_CLIENT, STAGE } from "../common/constants";
+import { RM_CLIENT } from "../common/constants";
 
 export class CreditPlusClient_EnvironmentConfigurationError extends LoggerError {
     constructor(message: string, data?: any) {
@@ -58,18 +58,17 @@ const createRequestHeaders = (): {
 } => {
     const apiKey = getApiKey();
     const credentials = createCredentials();
-
+	const interfaceId = get(process, 'env.CREDIT_PLUS_INTERFACE_ID');
+    if (!interfaceId) {
+        throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_INTERFACE_ID');
+    }
     const headers = {
         'Content-Type': 'text/xml',
         'Authorization': `Basic ${credentials}`,
         'x-api-key': apiKey,
-        'x-rm-client': RM_CLIENT
+        'x-rm-client': RM_CLIENT,
+		'MCL-Interface': interfaceId,
     }
-
-    if (process.env.STAGE !== STAGE.PROD) {
-        headers['MCL-Interface'] = 'SmartAPITestingIdentifier'
-    }
-
     return headers;
 }
 

@@ -26,6 +26,11 @@ custom:
     stage: https://creditplus-api-proxy.stagerm.io
     dev: https://creditplus-api-proxy.devrm.io
     pr: https://creditplus-api-proxy.prrm.io
+  interfaceId:
+    prod: RevolutionMortgage07302021
+    stage: SmartAPITestingIdentifier
+    dev: SmartAPITestingIdentifier
+    pr: SmartAPITestingIdentifier
   queueName: ${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay
 
 provider:
@@ -35,9 +40,10 @@ provider:
   profile: ${self:custom.profile.${self:custom.stage}}
   region: us-east-2
   tracing:
+    apiGateway: false
     lambda: true
   environment:
-    REGEN_CF_VARS: v1 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
+    REGEN_CF_VARS: v2 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
     REGION: ${self:provider.region}
     ACCOUNT_ID: '#{AWS::AccountId}'
@@ -53,6 +59,7 @@ provider:
     CREDIT_PLUS_API_KEY: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiKey}}"
     CREDIT_PLUS_API_USERNAME: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiUsername}}"
     CREDIT_PLUS_API_PASSWORD: !Sub "{{resolve:secretsmanager:${self:custom.stage}-${self:service}:SecretString:creditPlusApiPassword}}"
+    CREDIT_PLUS_INTERFACE_ID: ${self:custom.interfaceId.${self:custom.stage}}
     TABLE_NAME: ${self:custom.tableName}
 
 functions:
