@@ -48,9 +48,7 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'bert'
-                    }
+                    borrowerFirstName: 'bert'
                 }
             }
         }, {}, () => {})
@@ -70,10 +68,8 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'bert',
-                        borrowerLastName: 'not bet'
-                    }
+                    borrowerFirstName: 'bert',
+                    borrowerLastName: 'not bet'
                 }
             }
         }, {}, () => {})
@@ -93,11 +89,9 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'bert',
-                        borrowerLastName: 'not bet',
-                        borrowerSsn: '123'
-                    }
+                    borrowerFirstName: 'bert',
+                    borrowerLastName: 'not bet',
+                    borrowerSsn: '123'
                 }
             }
         }, {}, () => {})
@@ -121,12 +115,10 @@ describe('saveEncompassLoan', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        borrowerFirstName: 'bert',
-                        borrowerLastName: 'not bet',
-                        borrowerSsn: '123',
-                        vendorOrderIdentifier: '123456'
-                    }
+                    borrowerFirstName: 'bert',
+                    borrowerLastName: 'not bet',
+                    borrowerSsn: '123',
+                    vendorOrderIdentifier: '123456'
                 }
             }
         }, {}, () => {})).resolves.not.toThrowError();
