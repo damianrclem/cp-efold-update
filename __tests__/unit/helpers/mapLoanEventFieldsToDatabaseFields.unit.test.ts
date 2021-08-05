@@ -14,15 +14,13 @@ describe('mapLoanEventFieldsToDatabaseFields', () => {
                     }
                 },
                 responsePayload: {
-                    detail: {
-                        'borrowerFirstName': 'i',
-                        'borrowerLastName': 'am',
-                        'borrowerSsn': 'a',
-                        'coBorrowerFirstName': 'different',
-                        'coBorrowerLastName': 'value',
-                        'coBorrowerSsn': 'than they are',
-                        'vendorOrderIdentifier': 'blah'
-                    }
+                    'borrowerFirstName': 'i',
+                    'borrowerLastName': 'am',
+                    'borrowerSsn': 'a',
+                    'coBorrowerFirstName': 'different',
+                    'coBorrowerLastName': 'value',
+                    'coBorrowerSsn': 'than they are',
+                    'vendorOrderIdentifier': 'blah'
                 }
             }
         }

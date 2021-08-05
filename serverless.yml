@@ -127,15 +127,14 @@ functions:
                     id:
                       - anything-but: ""
               responsePayload:
-                detail:
-                  borrowerFirstName:
-                    - anything-but: ""
-                  borrowerLastName:
-                    - anything-but: ""
-                  borrowerSsn:
-                    - anything-but: ""
-                  vendorOrderIdentifier:
-                    - anything-but: ""
+                borrowerFirstName:
+                  - anything-but: ""
+                borrowerLastName:
+                  - anything-but: ""
+                borrowerSsn:
+                  - anything-but: ""
+                vendorOrderIdentifier:
+                  - anything-but: ""
     iamRoleStatements:
       - Effect: Allow
         Action:
