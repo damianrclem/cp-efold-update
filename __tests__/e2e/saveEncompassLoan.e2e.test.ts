@@ -33,7 +33,7 @@ describe('saveEncompassLoan', () => {
             Detail: JSON.stringify(event.detail),
             DetailType: "Lambda Function Invocation Result - Success",
             EventBusName: `${process.env.ENV}-credit-plus`,
-            Source: 'lmabda',
+            Source: 'lambda',
             Resources: [
                 `arn:aws:lambda:us-east-2:709027452869:function:cp-create-udn-order-dev-createUdnOrder:$LATEST`
             ]
