@@ -31,9 +31,9 @@ describe('saveEncompassLoan', () => {
 
         const entry = {
             Detail: JSON.stringify(event.detail),
-            DetailType: "lambda",
+            DetailType: "Lambda Function Invocation Result - Success",
             EventBusName: `${process.env.ENV}-credit-plus`,
-            Source: 'Lambda Function Invocation Result - Success',
+            Source: 'lmabda',
             Resources: [
                 `arn:aws:lambda:us-east-2:709027452869:function:cp-create-udn-order-dev-createUdnOrder:$LATEST`
             ]
@@ -94,9 +94,9 @@ describe('saveEncompassLoan', () => {
 
         const entry = {
             Detail: JSON.stringify(event.detail),
-            DetailType: "lambda",
+            DetailType: "Lambda Function Invocation Result - Success",
             EventBusName: `${process.env.ENV}-credit-plus`,
-            Source: 'Lambda Function Invocation Result - Success',
+            Source: 'lambda',
             Resources: [
                 `arn:aws:lambda:us-east-2:709027452869:function:cp-create-udn-order-dev-createUdnOrder:$LATEST`
             ]

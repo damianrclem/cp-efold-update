@@ -115,9 +115,9 @@ functions:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
             source:
-              - "Lambda Function Invocation Result - Success"
-            detail-type:
               - "lambda"
+            detail-type:
+              - "Lambda Function Invocation Result - Success"
             resources:
               - arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:cp-create-udn-order-${self:custom.stage}-createUdnOrder:$LATEST
             detail:
