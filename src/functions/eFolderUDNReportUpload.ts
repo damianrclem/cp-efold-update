@@ -61,6 +61,9 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         throw new InvalidEventParamsError("detail.loan.fields", event);
     }
 
+    const lastCompletedMilestone = get(event, 'detail.loan.fields["Log.MS.LastCompleted"]');
+    const isResubmittal = lastCompletedMilestone === 'Resubmittal';
+
     // Get the loan from the database
     const result = await getItem({
         PK: `LOAN#${loanId}`,
@@ -74,7 +77,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
 
     // Have the audit fields changed? If not, return early.
     const auditFieldsHaveChanged = haveLoanAuditFieldsChanged(result.Item, fields);
-    if (!auditFieldsHaveChanged) {
+    if (!auditFieldsHaveChanged && !isResubmittal) {
         return;
     }
 
