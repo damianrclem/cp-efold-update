@@ -63,7 +63,6 @@ describe('eFolderUDNReportUpload', () => {
             EventBusName: `${process.env.ENV}-credit-plus`,
             Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
         }
-        console.log(entry);
 
         await eventBridgeClient.send(new PutEventsCommand({
             Entries: [
@@ -144,7 +143,6 @@ describe('eFolderUDNReportUpload', () => {
             EventBusName: `${process.env.ENV}-credit-plus`,
             Source: 'com.revolutionmortgage.encompass.ee-loan-hooks'
         }
-        console.log(entry);
 
         await eventBridgeClient.send(new PutEventsCommand({
             Entries: [
