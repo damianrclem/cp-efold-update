@@ -24,7 +24,7 @@ describe('eFolderUDNReportUpload', () => {
             }
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
-        await expect(invalidHandler).rejects.toThrow("Required parameter detail.loan.fields is missing on event payload");
+        await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields is missing on event payload");
     }, testTimeout)
 
     test('throws LoanNotFoundError loan is not found', async () => {
@@ -49,8 +49,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: testLoanId,
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }
 
