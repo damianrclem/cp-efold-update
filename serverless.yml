@@ -80,9 +80,9 @@ functions:
               loan:
                 id:
                   - anything-but: ""
-                fields:
-                  'CX.CTC.AUDIT1':
-                    - anything-but: ""
+              fields:
+                'CX.CTC.AUDIT1':
+                  - anything-but: ""
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
@@ -96,9 +96,9 @@ functions:
               loan:
                 id:
                   - anything-but: ""
-                fields:
-                  'Log.MS.LastCompleted':
-                    - Resubmittal
+              fields:
+                'Log.MS.LastCompleted':
+                  - Resubmittal
 
     iamRoleStatements:
       - Effect: Allow
