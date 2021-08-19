@@ -53,7 +53,7 @@ describe('eFolderUDNReportUpload', () => {
         }, {}, () => { })
 
         await expect(handlerWithNoFields).rejects.toThrow(InvalidEventParamsError);
-        await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.loan.fields is missing on event payload');
+        await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.fields is missing on event payload');
     });
 
     test('it throws a LoanNotFoundError if no loan was found in the database', async () => {
@@ -61,8 +61,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).rejects.toThrow(LoanNotFoundError);
     });
@@ -85,8 +85,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: fields
-                }
+                },
+                fields: fields
             }
         }, {}, () => { })).resolves.not.toThrowError();
     })
@@ -121,8 +121,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -163,8 +163,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -201,8 +201,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
     });
@@ -240,8 +240,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -285,8 +285,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: '123',
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });

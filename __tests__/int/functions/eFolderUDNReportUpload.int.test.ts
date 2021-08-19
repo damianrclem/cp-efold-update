@@ -24,7 +24,7 @@ describe('eFolderUDNReportUpload', () => {
             }
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
-        await expect(invalidHandler).rejects.toThrow("Required parameter detail.loan.fields is missing on event payload");
+        await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields is missing on event payload");
     }, testTimeout)
 
     test('throws LoanNotFoundError loan is not found', async () => {
@@ -32,8 +32,8 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: "whatever",
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(LoanNotFoundError);
@@ -49,15 +49,15 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id: testLoanId,
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         }
 
         AUDIT_FIELDS.forEach(field => {
             const value = new Date().toString();
             testItem[field] = value
-            event.detail.loan.fields[field] = value
+            event.detail.fields[field] = value
         })
 
         await putItem(testItem)
@@ -102,14 +102,14 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id,
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         };
 
         AUDIT_FIELDS.forEach(field => {
             testItem[field] = "old"
-            event.detail.loan.fields[field] = "new"
+            event.detail.fields[field] = "new"
         })
 
         await putItem(testItem);
@@ -165,14 +165,14 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id,
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         };
 
         AUDIT_FIELDS.forEach(field => {
             testItem[field] = "old"
-            event.detail.loan.fields[field] = "new"
+            event.detail.fields[field] = "new"
         })
 
         await putItem(testItem);

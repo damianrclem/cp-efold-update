@@ -41,14 +41,14 @@ describe('eFolderUDNReportUpload', () => {
                 eventType: "customfield-changed",
                 loan: {
                     id,
-                    fields: {}
-                }
+                },
+                fields: {}
             }
         };
 
         AUDIT_FIELDS.forEach(field => {
             testItem[field] = "old"
-            event.detail.loan.fields[field] = "new"
+            event.detail.fields[field] = "new"
         })
 
         await putItem(testItem);
@@ -123,10 +123,10 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 eventType: "milestone-doneindicator-changed",
                 loan: {
-                    id,
-                    fields: {
-                        'Log.MS.LastCompleted': 'Resubmittal',
-                    }
+                    id
+                },
+                fields: {
+                    'Log.MS.LastCompleted': 'Resubmittal',
                 }
             }
         };

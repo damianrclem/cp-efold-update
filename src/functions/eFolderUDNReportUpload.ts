@@ -25,19 +25,19 @@ export class LoanNotFoundError extends LoggerError {
 interface Detail {
     loan: {
         id: string;
-        fields: {
-            "CX.CTC.AUDIT1": string;
-            "CX.CTC.AUDIT2": string;
-            "CX.CTC.AUDIT3": string;
-            "CX.CTC.AUDIT4": string;
-            "CX.CTC.AUDIT5": string;
-            "CX.CTC.AUDIT6": string;
-            "CX.CTC.AUDIT7": string;
-            "CX.CTC.AUDIT8": string;
-            "CX.CTC.AUDIT9": string;
-            "CX.CTC.AUDIT10": string;
-        }
-    };
+    }
+    fields: {
+        "CX.CTC.AUDIT1": string;
+        "CX.CTC.AUDIT2": string;
+        "CX.CTC.AUDIT3": string;
+        "CX.CTC.AUDIT4": string;
+        "CX.CTC.AUDIT5": string;
+        "CX.CTC.AUDIT6": string;
+        "CX.CTC.AUDIT7": string;
+        "CX.CTC.AUDIT8": string;
+        "CX.CTC.AUDIT9": string;
+        "CX.CTC.AUDIT10": string;
+    }
 }
 
 
@@ -56,12 +56,12 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         throw new InvalidEventParamsError("detail.loan.id", event);
     }
 
-    const fields = get(event, 'detail.loan.fields');
+    const fields = get(event, 'detail.fields');
     if (!fields) {
-        throw new InvalidEventParamsError("detail.loan.fields", event);
+        throw new InvalidEventParamsError("detail.fields", event);
     }
 
-    const lastCompletedMilestone = get(event, 'detail.loan.fields["Log.MS.LastCompleted"]');
+    const lastCompletedMilestone = get(event, 'detail.fields["Log.MS.LastCompleted"]');
     const isResubmittal = lastCompletedMilestone === 'Resubmittal';
 
     // Get the loan from the database
