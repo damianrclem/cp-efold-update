@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { handler, LoanDocumentForUDNReportsNotFoundError, LoanNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
+import { handler, LoanDocumentForUDNReportsNotFoundError } from '../../../src/functions/eFolderUDNReportUpload';
 import { InvalidEventParamsError } from '../../../src/common/errors';
 import { getLoan, getLoanDocuments, createLoanDocument } from "../../../src/clients/encompass";
 import { getEncompassLoanBorrowerBySocialSecurityNumber } from "../../../src/helpers/getEncompassLoanBorrowerBySocialSecurityNumber";
@@ -56,7 +56,7 @@ describe('eFolderUDNReportUpload', () => {
         await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.fields is missing on event payload');
     });
 
-    test('it throws a LoanNotFoundError if no loan was found in the database', async () => {
+    test('it does not throw an error if no loan was found in the database', async () => {
         await expect(handler({
             detail: {
                 loan: {
@@ -64,7 +64,7 @@ describe('eFolderUDNReportUpload', () => {
                 },
                 fields: {}
             }
-        }, {}, () => { })).rejects.toThrow(LoanNotFoundError);
+        }, {}, () => { })).resolves.not.toThrowError();
     });
 
     test('it does not throw an error if the loan audit fields have not changed', async () => {
