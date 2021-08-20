@@ -128,7 +128,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         CoborrowerLastName,
         CoborrowerSSN,
         VendorOrderIdentifier,
-        ...fields,
+        ...auditFields,
     })
 };
 
