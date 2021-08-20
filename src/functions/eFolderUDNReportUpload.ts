@@ -1,4 +1,4 @@
-import { LoggerError } from '@revolutionmortgage/rm-logger';
+import { Logger, LoggerError } from '@revolutionmortgage/rm-logger';
 import { EventBridgeHandler, EventBridgeEvent } from 'aws-lambda';
 import get from 'lodash/get';
 import { createLoanDocument, getLoan, getLoanDocuments } from '../clients/encompass';
@@ -13,12 +13,6 @@ import { InvalidEventParamsError } from '../common/errors';
 export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     constructor(message: string, data?: any) {
         super(message, data)
-    }
-}
-
-export class LoanNotFoundError extends LoggerError {
-    constructor(loanId: string) {
-        super(`Loan with id: ${loanId} not found`)
     }
 }
 
@@ -72,7 +66,9 @@ export const handler: Handler = async (event: Event): Promise<void> => {
 
     // If we can't find it, throw an error.
     if (!result || !result.Item) {
-        throw new LoanNotFoundError(loanId);
+        const logger = new Logger();
+        logger.info(`Item LOAN#${loanId} not found in database`)
+        return;
     }
 
     // Have the audit fields changed? If not, return early.

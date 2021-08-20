@@ -2,7 +2,7 @@
 
 import { deleteItem, putItem } from "../../../src/common/database";
 import { InvalidEventParamsError } from "../../../src/common/errors";
-import { handler, LoanNotFoundError } from "../../../src/functions/eFolderUDNReportUpload"
+import { handler } from "../../../src/functions/eFolderUDNReportUpload"
 import { createLoan, deleteLoan } from "../../../src/clients/encompass";
 import { AUDIT_FIELDS } from "../../../src/common/constants";
 
@@ -27,7 +27,7 @@ describe('eFolderUDNReportUpload', () => {
         await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields is missing on event payload");
     }, testTimeout)
 
-    test('throws LoanNotFoundError loan is not found', async () => {
+    test('does not throw an error if the loan is not found', async () => {
         const invalidHandler = handler({
             detail: {
                 loan: {
@@ -36,7 +36,7 @@ describe('eFolderUDNReportUpload', () => {
                 fields: {}
             }
         }, {}, () => { });
-        await expect(invalidHandler).rejects.toThrow(LoanNotFoundError);
+        await expect(invalidHandler).resolves.not.toThrowError();
     }, testTimeout)
 
     test('it does not blow up if the audit fields match', async () => {
