@@ -58,6 +58,9 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     const lastCompletedMilestone = get(event, 'detail.fields["Log.MS.LastCompleted"]');
     const isResubmittal = lastCompletedMilestone === 'Resubmittal';
 
+    const creditPlusManualPullFlagSet = get(event, 'detail.fields["CX.CP.MANUALUDNPULLFLAG"]');
+    const isCreditPlusFlagSet = creditPlusManualPullFlagSet === '1';
+
     // Get the loan from the database
     const result = await getItem({
         PK: `LOAN#${loanId}`,
@@ -73,7 +76,7 @@ export const handler: Handler = async (event: Event): Promise<void> => {
 
     // Have the audit fields changed? If not, return early.
     const auditFieldsHaveChanged = haveLoanAuditFieldsChanged(result.Item, fields);
-    if (!auditFieldsHaveChanged && !isResubmittal) {
+    if (!auditFieldsHaveChanged && !isResubmittal && !isCreditPlusFlagSet) {
         return;
     }
 
