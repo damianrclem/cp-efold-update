@@ -83,6 +83,24 @@ functions:
               fields:
                 'CX.CTC.AUDIT1':
                   - anything-but: ""
+
+      - eventBridge:
+          eventBus: ${self:custom.creditPlusEventBusArn}
+          pattern:
+            source:
+              - "com.revolutionmortgage.encompass.ee-loan-hooks"
+            detail-type:
+              - "Loan"
+            detail:
+              eventType:
+                - "customfield-changed"
+              loan:
+                id:
+                  - anything-but: ""
+              fields:
+                'CX.CP.MANUALUDNPULLFLAG':
+                  - "1"            
+
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
           pattern:
