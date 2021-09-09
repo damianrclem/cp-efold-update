@@ -7,4 +7,6 @@ export const loanAuditFieldsHaveChanged = (
     eventLoanFields: {
         [key: string]: any
     }
-): boolean => AUDIT_FIELDS.some((field) => databaseLoanItem[field] !== eventLoanFields[field])
+): boolean => AUDIT_FIELDS.some((field) => {
+    return eventLoanFields[field] && databaseLoanItem[field] !== eventLoanFields[field]
+})

@@ -122,7 +122,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    [AUDIT_FIELDS[0]]: 'a value'
+                }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -164,7 +166,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    [AUDIT_FIELDS[0]]: 'a value'
+                }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -202,7 +206,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    [AUDIT_FIELDS[0]]: 'a value'
+                }
             }
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
     });
@@ -241,7 +247,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    [AUDIT_FIELDS[0]]: 'a value'
+                }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
@@ -286,7 +294,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    [AUDIT_FIELDS[0]]: 'a value'
+                }
             }
         }, {}, () => { })).resolves.not.toThrowError();
     });
