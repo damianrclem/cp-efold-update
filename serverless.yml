@@ -18,7 +18,7 @@ custom:
   creditPlusEventBusName: "${self:custom.stage}-credit-plus"
   creditPlusEventBusArn: "arn:aws:events:#{AWS::Region}:#{AWS::AccountId}:event-bus/${self:custom.creditPlusEventBusName}"
   replayQueueArn: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-replay"
-  replayMaxCount: 5 # This is when messages quit replaying and go to the DLQ
+  replayMaxCount: 10 # This is when messages quit replaying and go to the DLQ
   cpEFolderUploadUDNOrdersTableName: ${self:custom.tableName}
   cpEFolderUploadUDNOrdersTableNameArn: "arn:aws:dynamodb:#{AWS::Region}:*:table/${self:custom.tableName}"
   creditPlusApiBaseUrl:
