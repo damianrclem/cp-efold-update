@@ -83,6 +83,8 @@ functions:
               fields:
                 'CX.CTC.AUDIT1':
                   - anything-but: ""
+                'CX.CP.MANUALUDNPULLFLAG':
+                  - anything-but: "1"
 
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
