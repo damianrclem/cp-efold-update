@@ -45,6 +45,8 @@ type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
  * @returns {Promise<void>}
  */
 export const handler: Handler = async (event: Event): Promise<void> => {
+    console.log(JSON.stringify(event));
+
     const loanId = get(event, 'detail.loan.id');
     if (!loanId) {
         throw new InvalidEventParamsError("detail.loan.id", event);
