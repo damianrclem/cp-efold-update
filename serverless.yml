@@ -42,6 +42,8 @@ provider:
   tracing:
     apiGateway: false
     lambda: true
+  eventBridge:
+    useCloudFormation: true
   environment:
     REGEN_CF_VARS: v2 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
@@ -84,6 +86,7 @@ functions:
                 'CX.CTC.AUDIT1':
                   - anything-but: ""
                 'CX.CP.MANUALUDNPULLFLAG':
+                  - exists: false
                   - anything-but: "1"
 
       - eventBridge:
