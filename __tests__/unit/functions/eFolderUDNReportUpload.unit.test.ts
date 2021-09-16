@@ -56,18 +56,22 @@ describe('eFolderUDNReportUpload', () => {
         await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.fields is missing on event payload');
     });
 
-    test('it does not throw an error if no loan was found in the database', async () => {
-        await expect(handler({
+    test('it does not upload a udn report if no loan was found in the database', async () => {
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
                 },
                 fields: {}
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
     });
 
-    test('it does not throw an error if the loan audit fields have not changed', async () => {
+    test('it does not upload a udn report if the loan audit fields have not changed', async () => {
         const testItem = {};
         const fields = {};
         AUDIT_FIELDS.forEach((field) => {
@@ -81,17 +85,21 @@ describe('eFolderUDNReportUpload', () => {
             Item: testItem
         })
 
-        await expect(handler({
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
                 },
                 fields: fields
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
     })
 
-    test('it does not throw an error if there is an existing loan document to upload to', async () => {
+    test('it uploads a udn report if there is an existing loan document to upload to', async () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever'
@@ -117,7 +125,7 @@ describe('eFolderUDNReportUpload', () => {
             id: 'hey yo'
         })
 
-        await expect(handler({
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
@@ -126,10 +134,14 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value'
                 }
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
     });
 
-    test('it does not throw an error if there is NOT an existing loan document to upload to', async () => {
+    test('it uploads a udn report if there is NOT an existing loan document to upload to', async () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever'
@@ -161,7 +173,7 @@ describe('eFolderUDNReportUpload', () => {
 
         getUDNReport.mockResolvedValue('i am a pdf')
 
-        await expect(handler({
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
@@ -170,7 +182,11 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value'
                 }
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
     });
 
     test('it does throw an error if no document was found to upload to', async () => {
@@ -213,7 +229,7 @@ describe('eFolderUDNReportUpload', () => {
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
     });
 
-    test('it does not throw an error if there is a Coborrower and an existing loan document to upload to', async () => {
+    test('it uploads a udn report if there is a Coborrower and an existing loan document to upload to', async () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever',
@@ -242,7 +258,7 @@ describe('eFolderUDNReportUpload', () => {
             id: 'hey yo'
         })
 
-        await expect(handler({
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
@@ -251,10 +267,14 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value'
                 }
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
     });
 
-    test('it does not throw an error if there is a Coborrower and NOT an existing loan document to upload to', async () => {
+    test('it uploads a udn report if there is a Coborrower and NOT an existing loan document to upload to', async () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever',
@@ -289,7 +309,7 @@ describe('eFolderUDNReportUpload', () => {
 
         getUDNReport.mockResolvedValue('i am a pdf')
 
-        await expect(handler({
+        const response = await handler({
             detail: {
                 loan: {
                     id: '123',
@@ -298,6 +318,10 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value'
                 }
             }
-        }, {}, () => { })).resolves.not.toThrowError();
+        }, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
     });
 });
