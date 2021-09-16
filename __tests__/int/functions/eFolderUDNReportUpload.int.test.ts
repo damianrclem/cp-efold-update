@@ -27,8 +27,8 @@ describe('eFolderUDNReportUpload', () => {
         await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields is missing on event payload");
     }, testTimeout)
 
-    test('does not throw an error if the loan is not found', async () => {
-        const invalidHandler = handler({
+    test('does not upload a udn report if the loan is not found', async () => {
+        const response = await handler({
             detail: {
                 loan: {
                     id: "whatever",
@@ -36,10 +36,13 @@ describe('eFolderUDNReportUpload', () => {
                 fields: {}
             }
         }, {}, () => { });
-        await expect(invalidHandler).resolves.not.toThrowError();
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
     }, testTimeout)
 
-    test('it does not blow up if the audit fields match', async () => {
+    test('it does not upload a udn report if the audit fields match', async () => {
         const testLoanId = 'joemama';
         const testItem = {
             PK: `LOAN#${testLoanId}`,
@@ -62,7 +65,11 @@ describe('eFolderUDNReportUpload', () => {
 
         await putItem(testItem)
 
-        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
+        const response = await handler(event, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
 
         await deleteItem({
             PK: `LOAN#${testLoanId}`,
@@ -70,7 +77,7 @@ describe('eFolderUDNReportUpload', () => {
         })
     }, testTimeout);
 
-    test('it does not blow up when uploading UDN report for a borrower', async () => {
+    test('it successfully uploads when trying to upload a UDN report for a borrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
         const borrowerFirstName = "Integration Test";
@@ -114,7 +121,11 @@ describe('eFolderUDNReportUpload', () => {
 
         await putItem(testItem);
 
-        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
+        const response = await handler(event, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
 
         await deleteLoan(id);
         await deleteItem({
@@ -123,7 +134,7 @@ describe('eFolderUDNReportUpload', () => {
         })
     }, testTimeout)
 
-    test('it does not blow up when uploading UDN report for a borrower and coborrower', async () => {
+    test('it successfully uploads when trying to upload a UDN report for a borrower and coborrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
         const borrowerFirstName = "Integration Test";
@@ -177,7 +188,11 @@ describe('eFolderUDNReportUpload', () => {
 
         await putItem(testItem);
 
-        await expect(handler(event, {}, () => { })).resolves.not.toThrow();
+        const response = await handler(event, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: true,
+        })
 
         await deleteLoan(id);
         await deleteItem({
