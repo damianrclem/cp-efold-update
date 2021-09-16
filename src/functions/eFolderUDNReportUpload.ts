@@ -34,17 +34,20 @@ interface Detail {
     }
 }
 
+interface Response {
+    udnReportUploaded: boolean;
+}
 
 type EVENT_TYPE = 'Loan';
-type Handler = EventBridgeHandler<EVENT_TYPE, Detail, void>;
+type Handler = EventBridgeHandler<EVENT_TYPE, Detail, Response>;
 type Event = EventBridgeEvent<EVENT_TYPE, Detail>;
 
 /**
  * This lambda will upload a UDN report to an eFolder in Encompass
  * @param {Event} event - The event that triggers this lambda
- * @returns {Promise<void>}
+ * @returns {Promise<Response>}
  */
-export const handler: Handler = async (event: Event): Promise<void> => {
+export const handler: Handler = async (event: Event): Promise<Response> => {
     console.log(JSON.stringify(event));
 
     const loanId = get(event, 'detail.loan.id');
@@ -73,13 +76,17 @@ export const handler: Handler = async (event: Event): Promise<void> => {
     if (!result || !result.Item) {
         const logger = new Logger();
         logger.info(`Item LOAN#${loanId} not found in database`)
-        return;
+        return {
+            udnReportUploaded: false,
+        };
     }
 
     // Have the audit fields changed? If not, return early.
     const auditFieldsHaveChanged = haveLoanAuditFieldsChanged(result.Item, fields);
     if (!auditFieldsHaveChanged && !isResubmittal && !isCreditPlusFlagSet) {
-        return;
+        return {
+            udnReportUploaded: false,
+        };
     }
 
     // If they have changed, we need to upload the UDN report.
@@ -135,6 +142,10 @@ export const handler: Handler = async (event: Event): Promise<void> => {
         VendorOrderIdentifier,
         ...auditFields,
     })
+
+    return {
+        udnReportUploaded: true,
+    }
 };
 
 const uploadUDNReportForBorrower = async ({
