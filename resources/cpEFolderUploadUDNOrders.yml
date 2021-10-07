@@ -4,6 +4,8 @@ Resources:
     DeletionPolicy: Retain
     Properties:
       TableName: ${self:custom.tableName}
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: "PK"
