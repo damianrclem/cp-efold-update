@@ -99,34 +99,34 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
 
     // If they have changed, we need to upload the UDN report.
     const {
-        BorrowerFirstName,
-        BorrowerLastName,
-        BorrowerSSN,
-        CoborrowerFirstName,
-        CoborrowerLastName,
-        CoborrowerSSN,
-        VendorOrderIdentifier,
-    } = result.Item;
+        '4000': borrowerFirstName,
+        '4002': borrowerLastName,
+        '65': borrowerSSN,
+        '4004': coborrowerFirstName,
+        '4006': coborrowerLastName,
+        '97': coborrowerSSN,
+        'CX.CP.UDN.FILENUMBER': vendorOrderIdentifier
+    } = fields;
 
     // Create a list of upload requests to make to encompass, starting with the borrower
     const uploadRequests: Array<Promise<void>> = [
         uploadUDNReportForBorrower({
             loanId,
-            firstName: BorrowerFirstName,
-            lastName: BorrowerLastName,
-            socialSecurityNumber: BorrowerSSN,
-            vendorOrderIdentifier: VendorOrderIdentifier
+            firstName: borrowerFirstName,
+            lastName: borrowerLastName,
+            socialSecurityNumber: borrowerSSN,
+            vendorOrderIdentifier
         })
     ];
 
     // If we have a coborrower, add it to the list of requests
-    if (CoborrowerFirstName && CoborrowerLastName && CoborrowerSSN) {
+    if (coborrowerFirstName && coborrowerLastName && coborrowerSSN) {
         uploadRequests.push(uploadUDNReportForBorrower({
             loanId,
-            firstName: CoborrowerFirstName,
-            lastName: CoborrowerLastName,
-            socialSecurityNumber: CoborrowerSSN,
-            vendorOrderIdentifier: VendorOrderIdentifier
+            firstName: coborrowerFirstName,
+            lastName: coborrowerLastName,
+            socialSecurityNumber: coborrowerSSN,
+            vendorOrderIdentifier
         }))
     }
     
@@ -141,13 +141,6 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
     await putItem({
         PK: `LOAN#${loanId}`,
         SK: `LOAN#${loanId}`,
-        BorrowerFirstName,
-        BorrowerLastName,
-        BorrowerSSN,
-        CoborrowerFirstName,
-        CoborrowerLastName,
-        CoborrowerSSN,
-        VendorOrderIdentifier,
         ...auditFields,
     })
 
