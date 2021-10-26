@@ -13,15 +13,6 @@ describe('mapLoanEventFieldsToDatabaseFields', () => {
                         }
                     }
                 },
-                responsePayload: {
-                    'borrowerFirstName': 'i',
-                    'borrowerLastName': 'am',
-                    'borrowerSsn': 'a',
-                    'coBorrowerFirstName': 'different',
-                    'coBorrowerLastName': 'value',
-                    'coBorrowerSsn': 'than they are',
-                    'vendorOrderIdentifier': 'blah'
-                }
             }
         }
 
@@ -29,13 +20,6 @@ describe('mapLoanEventFieldsToDatabaseFields', () => {
 
         expect(result).toEqual({
             Id: 'my id',
-            BorrowerFirstName: 'i',
-            BorrowerLastName: 'am',
-            BorrowerSSN: 'a',
-            CoborrowerFirstName: 'different',
-            CoborrowerLastName: 'value',
-            CoborrowerSSN: 'than they are',
-            VendorOrderIdentifier: 'blah'
         })
     })
 })
