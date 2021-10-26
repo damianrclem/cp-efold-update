@@ -55,10 +55,6 @@ const validateEventPayload = (event: Event, pathsToRequiredParams: Array<string>
 export const handler: Handler = async (event: Event) => {
     validateEventPayload(event, [
         "detail.requestPayload.detail.loan.id",
-        "detail.responsePayload.borrowerFirstName",
-        "detail.responsePayload.borrowerLastName",
-        "detail.responsePayload.borrowerSsn",
-        "detail.responsePayload.vendorOrderIdentifier"
     ])
 
     const loanItem = mapLoanEventFieldsToDatabaseFields(event);
