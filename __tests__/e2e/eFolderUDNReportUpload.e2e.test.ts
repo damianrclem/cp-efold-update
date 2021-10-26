@@ -30,10 +30,6 @@ describe('eFolderUDNReportUpload', () => {
         const testItem = {
             PK: `LOAN#${id}`,
             SK: `LOAN#${id}`,
-            BorrowerFirstName: borrowerFirstName,
-            BorrowerLastName: borrowerLastName,
-            BorrowerSSN: SSN,
-            VendorOrderIdentifier: VendorOrderId,
         };
 
         const event = {
@@ -42,7 +38,12 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id,
                 },
-                fields: {}
+                fields: {
+                    '4000': borrowerFirstName,
+                    '4002': borrowerLastName,
+                    '65': SSN,
+                    'CX.CP.UDN.FILENUMBER': VendorOrderId,
+                }
             }
         };
 
@@ -80,8 +81,6 @@ describe('eFolderUDNReportUpload', () => {
             attempts = attempts + 1;
         }
 
-        console.log(loanDocuments)
-
         const loanDocument = getLoanDocumentByTitle(loanDocuments, UDN_REPORTS_E_FOLDER_DOCUMENT_TITLE);
         expect(loanDocument).toBeTruthy();
         expect(loanDocument?.attachments.length).toBeGreaterThan(0);
@@ -115,10 +114,6 @@ describe('eFolderUDNReportUpload', () => {
         const testItem = {
             PK: `LOAN#${id}`,
             SK: `LOAN#${id}`,
-            BorrowerFirstName: borrowerFirstName,
-            BorrowerLastName: borrowerLastName,
-            BorrowerSSN: SSN,
-            VendorOrderIdentifier: VendorOrderId,
         };
 
         const event = {
@@ -129,6 +124,10 @@ describe('eFolderUDNReportUpload', () => {
                 },
                 fields: {
                     'Log.MS.LastCompleted': 'Resubmittal',
+                    '4000': borrowerFirstName,
+                    '4002': borrowerLastName,
+                    '65': SSN,
+                    'CX.CP.UDN.FILENUMBER': VendorOrderId,
                 }
             }
         };
