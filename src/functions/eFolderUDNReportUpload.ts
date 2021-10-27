@@ -16,22 +16,33 @@ export class LoanDocumentForUDNReportsNotFoundError extends LoggerError {
     }
 }
 
+interface LoanFields {
+    'CX.CP.UDN.FILENUMBER': string; // udn vendor order id
+    '4000': string; // borrower first name
+    '4002': string; // borrower last name
+    '65': string; // borrower ssn
+    '4004'?: string; // coborrower first name
+    '4006'?: string; // coborrower last name
+    '97'?: string; // coborrower ssn
+    "CX.CTC.AUDIT1": string;
+    "CX.CTC.AUDIT2": string;
+    "CX.CTC.AUDIT3": string;
+    "CX.CTC.AUDIT4": string;
+    "CX.CTC.AUDIT5": string;
+    "CX.CTC.AUDIT6": string;
+    "CX.CTC.AUDIT7": string;
+    "CX.CTC.AUDIT8": string;
+    "CX.CTC.AUDIT9": string;
+    "CX.CTC.AUDIT10": string;
+    "Log.MS.LastCompleted": string; // milestone completed
+    "CX.CP.MANUALUDNPULLFLAG": string; // upload udn manually flag
+}
+
 interface Detail {
     loan: {
         id: string;
     }
-    fields: {
-        "CX.CTC.AUDIT1": string;
-        "CX.CTC.AUDIT2": string;
-        "CX.CTC.AUDIT3": string;
-        "CX.CTC.AUDIT4": string;
-        "CX.CTC.AUDIT5": string;
-        "CX.CTC.AUDIT6": string;
-        "CX.CTC.AUDIT7": string;
-        "CX.CTC.AUDIT8": string;
-        "CX.CTC.AUDIT9": string;
-        "CX.CTC.AUDIT10": string;
-    }
+    fields: LoanFields;
 }
 
 interface Response {
@@ -55,16 +66,13 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
         throw new InvalidEventParamsError("detail.loan.id", event);
     }
 
-    const fields = get(event, 'detail.fields');
+    const fields = get(event, 'detail.fields') as LoanFields;
     if (!fields) {
         throw new InvalidEventParamsError("detail.fields", event);
     }
 
-    const lastCompletedMilestone = get(event, 'detail.fields["Log.MS.LastCompleted"]');
-    const isResubmittal = lastCompletedMilestone === 'Resubmittal';
-
-    const creditPlusManualPullFlagSet = get(event, 'detail.fields["CX.CP.MANUALUDNPULLFLAG"]');
-    const isCreditPlusFlagSet = creditPlusManualPullFlagSet === '1';
+    const isResubmittal = fields["Log.MS.LastCompleted"] === 'Resubmittal';
+    const isCreditPlusFlagSet = fields["CX.CP.MANUALUDNPULLFLAG"] === '1';
 
     // Get the loan from the database
     const result = await getItem({
@@ -91,34 +99,34 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
 
     // If they have changed, we need to upload the UDN report.
     const {
-        BorrowerFirstName,
-        BorrowerLastName,
-        BorrowerSSN,
-        CoborrowerFirstName,
-        CoborrowerLastName,
-        CoborrowerSSN,
-        VendorOrderIdentifier,
-    } = result.Item;
+        '4000': borrowerFirstName,
+        '4002': borrowerLastName,
+        '65': borrowerSSN,
+        '4004': coborrowerFirstName,
+        '4006': coborrowerLastName,
+        '97': coborrowerSSN,
+        'CX.CP.UDN.FILENUMBER': vendorOrderIdentifier
+    } = fields;
 
     // Create a list of upload requests to make to encompass, starting with the borrower
     const uploadRequests: Array<Promise<void>> = [
         uploadUDNReportForBorrower({
             loanId,
-            firstName: BorrowerFirstName,
-            lastName: BorrowerLastName,
-            socialSecurityNumber: BorrowerSSN,
-            vendorOrderIdentifier: VendorOrderIdentifier
+            firstName: borrowerFirstName,
+            lastName: borrowerLastName,
+            socialSecurityNumber: borrowerSSN,
+            vendorOrderIdentifier
         })
     ];
 
     // If we have a coborrower, add it to the list of requests
-    if (CoborrowerFirstName && CoborrowerLastName && CoborrowerSSN) {
+    if (coborrowerFirstName && coborrowerLastName && coborrowerSSN) {
         uploadRequests.push(uploadUDNReportForBorrower({
             loanId,
-            firstName: CoborrowerFirstName,
-            lastName: CoborrowerLastName,
-            socialSecurityNumber: CoborrowerSSN,
-            vendorOrderIdentifier: VendorOrderIdentifier
+            firstName: coborrowerFirstName,
+            lastName: coborrowerLastName,
+            socialSecurityNumber: coborrowerSSN,
+            vendorOrderIdentifier
         }))
     }
     
@@ -133,13 +141,6 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
     await putItem({
         PK: `LOAN#${loanId}`,
         SK: `LOAN#${loanId}`,
-        BorrowerFirstName,
-        BorrowerLastName,
-        BorrowerSSN,
-        CoborrowerFirstName,
-        CoborrowerLastName,
-        CoborrowerSSN,
-        VendorOrderIdentifier,
         ...auditFields,
     })
 

@@ -3,13 +3,6 @@ import { Event } from "../functions/saveEncompassLoan"
 
 interface LoanItem {
     Id: string;
-    BorrowerFirstName: string;
-    BorrowerLastName: string;
-    BorrowerSSN: string;
-    CoborrowerFirstName: string;
-    CoborrowerLastName: string;
-    CoborrowerSSN: string;
-    VendorOrderIdentifier: string
 }
 
 /**
@@ -19,13 +12,6 @@ interface LoanItem {
  */
 export const mapLoanEventFieldsToDatabaseFields = (event: Event): LoanItem => {
     return {
-        Id: get(event, 'detail.requestPayload.detail.loan.id'),
-        BorrowerFirstName: get(event, 'detail.responsePayload.borrowerFirstName'),
-        BorrowerLastName: get(event, 'detail.responsePayload.borrowerLastName'),
-        BorrowerSSN: get(event, 'detail.responsePayload.borrowerSsn'),
-        CoborrowerFirstName: get(event, 'detail.responsePayload.coBorrowerFirstName'),
-        CoborrowerLastName: get(event, 'detail.responsePayload.coBorrowerLastName'),
-        CoborrowerSSN: get(event, 'detail.responsePayload.coBorrowerSsn'),
-        VendorOrderIdentifier: get(event, 'detail.responsePayload.vendorOrderIdentifier')
+        Id: get(event, 'detail.requestPayload.detail.loan.id')
     }
 }

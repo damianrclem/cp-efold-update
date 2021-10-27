@@ -233,9 +233,6 @@ describe('eFolderUDNReportUpload', () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever',
-                CoborrowerFirstName: 'Billy',
-                CoborrowerLastName: 'Bob',
-                CoborrowerSSN: 'the clown'
             }
         })
         
@@ -264,7 +261,10 @@ describe('eFolderUDNReportUpload', () => {
                     id: '123',
                 },
                 fields: {
-                    [AUDIT_FIELDS[0]]: 'a value'
+                    [AUDIT_FIELDS[0]]: 'a value',
+                    '4004': 'Billy',
+                    '4006': 'Bob',
+                    '97': 'the clown'
                 }
             }
         }, {}, () => { });
@@ -278,9 +278,6 @@ describe('eFolderUDNReportUpload', () => {
         getItem.mockResolvedValue({
             Item: {
                 [AUDIT_FIELDS[0]]: 'whatever',
-                CoborrowerFirstName: 'Billy',
-                CoborrowerLastName: 'Bob',
-                CoborrowerSSN: 'the clown'
             }
         })
         
@@ -315,7 +312,10 @@ describe('eFolderUDNReportUpload', () => {
                     id: '123',
                 },
                 fields: {
-                    [AUDIT_FIELDS[0]]: 'a value'
+                    [AUDIT_FIELDS[0]]: 'a value',
+                    '4004': 'Billy',
+                    '4006': 'Bob',
+                    '97': 'the clown'
                 }
             }
         }, {}, () => { });
