@@ -1,5 +1,4 @@
 import { LoggerError } from "@revolutionmortgage/rm-logger"
-import { formatAsSocialSecurityNumber } from './formatAsSocialSecurityNumber'
 
 interface Borrower {
     fullName: string
@@ -37,8 +36,7 @@ const getBorrower = (
     applications: Array<Application>,
     borrowerType: 'borrower' | 'coborrower'
 ): Borrower | undefined => {
-    const formattedSSN = formatAsSocialSecurityNumber(socialSecurityNumber);
-    const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationIdentifier === formattedSSN);
+    const application = applications.find((application: Application) => application[borrowerType]?.taxIdentificationIdentifier === socialSecurityNumber);
     if (!application) {
         return;
     }
@@ -73,14 +71,19 @@ export const getEncompassLoanBorrowerBySocialSecurityNumber = (
         throw new NoLoanApplicationsError(loan);
     }
 
+    const formattedSocialSecurityNumber = socialSecurityNumber.replace(/[^0-9]/g, '').replace(/(\d{3})(\d{2})(\d{4})/g, '$1-$2-$3');
+    if (!(/\d{3}-\d{2}-\d{4}/.test(formattedSocialSecurityNumber))) {
+        throw new Error('socialSecurityNumber must be formatted xxx-xx-xxxx');
+    }
+
     // Find matching borrowers first
-    const applicationWithMatchingBorrower = getBorrower(socialSecurityNumber, applications, 'borrower');
+    const applicationWithMatchingBorrower = getBorrower(formattedSocialSecurityNumber, applications, 'borrower');
     if (applicationWithMatchingBorrower) {
         return applicationWithMatchingBorrower;
     }
 
     // If we did not find any matching borrowers, check the applications coborrowers
-    const applicationWithMatchingCoborrower = getBorrower(socialSecurityNumber, applications, 'coborrower');
+    const applicationWithMatchingCoborrower = getBorrower(formattedSocialSecurityNumber, applications, 'coborrower');
     if (applicationWithMatchingCoborrower) {
         return applicationWithMatchingCoborrower;
     }

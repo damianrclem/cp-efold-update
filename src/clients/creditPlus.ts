@@ -4,9 +4,9 @@ import { get } from "lodash";
 import { RM_CLIENT } from "../common/constants";
 
 export class CreditPlusClient_EnvironmentConfigurationError extends LoggerError {
-    constructor(message: string, data?: any) {
-        super(message, data);
-    }
+	constructor(message: string, data?: any) {
+		super(message, data);
+	}
 }
 
 /**
@@ -14,10 +14,10 @@ export class CreditPlusClient_EnvironmentConfigurationError extends LoggerError 
  * @returns {string} The url for the credit plus api proxy
  */
 const getUrl = (): string => {
-    const baseUrl = get(process, 'env.CREDIT_PLUS_API_BASE_URL');
-    if (!baseUrl) throw new CreditPlusClient_EnvironmentConfigurationError('Environment missing CREDIT_PLUS_API_BASE_URL');
+	const baseUrl = get(process, 'env.CREDIT_PLUS_API_BASE_URL');
+	if (!baseUrl) throw new CreditPlusClient_EnvironmentConfigurationError('Environment missing CREDIT_PLUS_API_BASE_URL');
 
-    return `${baseUrl}/inetapi/request_products.aspx`;
+	return `${baseUrl}/inetapi/request_products.aspx`;
 }
 
 /**
@@ -25,10 +25,10 @@ const getUrl = (): string => {
  * @return {string} The api key
  */
 const getApiKey = (): string => {
-    const apiKey = get(process, 'env.CREDIT_PLUS_API_KEY');
-    if (!apiKey) throw new CreditPlusClient_EnvironmentConfigurationError('Environment missing CREDIT_PLUS_API_KEY');
+	const apiKey = get(process, 'env.CREDIT_PLUS_API_KEY');
+	if (!apiKey) throw new CreditPlusClient_EnvironmentConfigurationError('Environment missing CREDIT_PLUS_API_KEY');
 
-    return apiKey as string;
+	return apiKey as string;
 }
 
 /**
@@ -36,17 +36,17 @@ const getApiKey = (): string => {
  * @returns {string} - The base64 encoded credentials
  */
 const createCredentials = (): string => {
-    const username = get(process, 'env.CREDIT_PLUS_API_USERNAME');
-    if (!username) {
-        throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_API_USERNAME');
-    }
+	const username = get(process, 'env.CREDIT_PLUS_API_USERNAME');
+	if (!username) {
+		throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_API_USERNAME');
+	}
 
-    const password = get(process, 'env.CREDIT_PLUS_API_PASSWORD');
-    if (!password) {
-        throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_API_PASSWORD');
-    }
+	const password = get(process, 'env.CREDIT_PLUS_API_PASSWORD');
+	if (!password) {
+		throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_API_PASSWORD');
+	}
 
-    return Buffer.from(`${username}:${password}`).toString('base64');
+	return Buffer.from(`${username}:${password}`).toString('base64');
 }
 
 /**
@@ -54,29 +54,29 @@ const createCredentials = (): string => {
  * @returns {Object} - The request headers
  */
 const createRequestHeaders = (): {
-    [key: string]: string
+	[key: string]: string
 } => {
-    const apiKey = getApiKey();
-    const credentials = createCredentials();
+	const apiKey = getApiKey();
+	const credentials = createCredentials();
 	const interfaceId = get(process, 'env.CREDIT_PLUS_INTERFACE_ID');
-    if (!interfaceId) {
-        throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_INTERFACE_ID');
-    }
-    const headers = {
-        'Content-Type': 'text/xml',
-        'Authorization': `Basic ${credentials}`,
-        'x-api-key': apiKey,
-        'x-rm-client': RM_CLIENT,
+	if (!interfaceId) {
+		throw new CreditPlusClient_EnvironmentConfigurationError('Environment variable missing CREDIT_PLUS_INTERFACE_ID');
+	}
+	const headers = {
+		'Content-Type': 'text/xml',
+		'Authorization': `Basic ${credentials}`,
+		'x-api-key': apiKey,
+		'x-rm-client': RM_CLIENT,
 		'MCL-Interface': interfaceId,
-    }
-    return headers;
+	}
+	return headers;
 }
 
 interface GetUDNOrderParams {
-    firstName: string
-    lastName: string
-    socialSecurityNumber: string
-    vendorOrderIdentifier: string
+	firstName: string
+	lastName: string
+	socialSecurityNumber: string
+	vendorOrderIdentifier: string
 }
 
 /**
@@ -89,9 +89,9 @@ interface GetUDNOrderParams {
  * @returns {Promise<AxiosResponse<any>>} the response from the api
  */
 export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosResponse<any>> => {
-    const url = getUrl();
-    const headers = createRequestHeaders();
-    const xmls = `<?xml version="1.0" encoding="utf-8"?>
+	const url = getUrl();
+	const headers = createRequestHeaders();
+	const xmls = `<?xml version="1.0" encoding="utf-8"?>
 <MESSAGE MessageType="Request" xmlns="http://www.mismo.org/residential/2009/schemas" xmlns:p2="http://www.w3.org/1999/xlink" xmlns:p3="inetapi/MISMO3_4_MCL_Extension.xsd">
 	<ABOUT_VERSIONS>
 		<ABOUT_VERSION>
@@ -121,7 +121,7 @@ export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosRespo
 							<TAXPAYER_IDENTIFIERS>
 								<TAXPAYER_IDENTIFIER>
 									<TaxpayerIdentifierType>SocialSecurityNumber</TaxpayerIdentifierType>
-									<TaxpayerIdentifierValue>${params.socialSecurityNumber}</TaxpayerIdentifierValue>
+									<TaxpayerIdentifierValue>${params.socialSecurityNumber.replace(/[^0-9]/g, '')}</TaxpayerIdentifierValue>
 								</TAXPAYER_IDENTIFIER>
 							</TAXPAYER_IDENTIFIERS>
 						</PARTY>      			
@@ -176,8 +176,8 @@ export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosRespo
 	</DEAL_SETS>
 </MESSAGE>`;
 
-    const response = await axios.post(url, xmls, { headers });
-    return response;
+	const response = await axios.post(url, xmls, { headers });
+	return response;
 }
 
 

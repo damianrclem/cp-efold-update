@@ -69,7 +69,7 @@ describe('getEncompassLoanBorrowerBySocialSecurityNumber', () => {
             ]
         }
 
-        expect(() => getEncompassLoanBorrowerBySocialSecurityNumber(ssn, loan)).toThrow(NoLoanBorrowerWithMatchingSSNError);
+        expect(() => getEncompassLoanBorrowerBySocialSecurityNumber(ssn, loan)).toThrow('socialSecurityNumber must be formatted xxx-xx-xxxx');
     });
 
     test('throws an error if no applications exist on the loan', () => {
