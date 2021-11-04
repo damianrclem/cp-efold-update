@@ -80,13 +80,20 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
         SK: `LOAN#${loanId}`
     });
 
-    // If we can't find it, throw an error.
+    // If we can't find it, log it, return early.
     if (!result || !result.Item) {
         const logger = new Logger();
         logger.info(`Item LOAN#${loanId} not found in database`)
         return {
             udnReportUploaded: false,
         };
+    }
+    
+    // If this loan has been flagged for never being able to upload, return early.
+    if (result.Item.UDNReportNotUploadable === true) {
+        return {
+            udnReportUploaded: false,
+        }
     }
 
     // Have the audit fields changed? If not, return early.
