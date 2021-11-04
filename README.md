@@ -35,3 +35,6 @@ In order to run the integration tests, you must make sure that all of the proper
 ```
 yarn test:int
 ```
+
+## Troubleshooting Errors
+There are some cases, where UDN reports are just not uploadable. Either, the borrower/coborrower information is out of sync between credit plus and encompass or one was created outside of the automation. If that is the case, in order to stop trying to upload the report, set the attribute `UDNReportNotUploadable` on that loan in this service's database to `true`.

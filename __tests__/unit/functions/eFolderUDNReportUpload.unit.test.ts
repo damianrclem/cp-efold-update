@@ -71,6 +71,28 @@ describe('eFolderUDNReportUpload', () => {
         })
     });
 
+    test('it does not upload if udn report is not uploadable', async () => {
+        const testItem = {
+            UDNReportNotUploadable: true
+        };
+        const response = await handler({
+            detail: {
+                loan: {
+                    id: '123',
+                },
+                fields: {}
+            }
+        }, {}, () => { });
+
+        getItem.mockResolvedValue({
+            Item: testItem
+        })
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
+    });
+
     test('it does not upload a udn report if the loan audit fields have not changed', async () => {
         const testItem = {};
         const fields = {};

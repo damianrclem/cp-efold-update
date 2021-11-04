@@ -77,6 +77,36 @@ describe('eFolderUDNReportUpload', () => {
         })
     }, testTimeout);
 
+    test('it does not upload a udn report if the audit fields match', async () => {
+        const testLoanId = 'joemama';
+        const testItem = {
+            PK: `LOAN#${testLoanId}`,
+            SK: `LOAN#${testLoanId}`,
+            UDNReportNotUploadable: true,
+        };
+        const event = {
+            detail: {
+                loan: {
+                    id: testLoanId,
+                },
+                fields: {}
+            }
+        }
+
+        await putItem(testItem)
+
+        const response = await handler(event, {}, () => { });
+
+        expect(response).toEqual({
+            udnReportUploaded: false,
+        })
+
+        await deleteItem({
+            PK: `LOAN#${testLoanId}`,
+            SK: `LOAN#${testLoanId}`,
+        })
+    }, testTimeout);
+
     test('it successfully uploads when trying to upload a UDN report for a borrower', async () => {
         const SSN = "799684724";
         const VendorOrderId = "884";
