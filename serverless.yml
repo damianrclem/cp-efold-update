@@ -45,7 +45,7 @@ provider:
   eventBridge:
     useCloudFormation: true
   environment:
-    REGEN_CF_VARS: v2 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
+    REGEN_CF_VARS: v3 # Change this to force CloudFormation to regen stack. Useful if you change a value in secrets manager
     ENCOMPASS_API_BASE_URL: ${self:custom.encompassApiBaseUrl.${self:custom.stage}}
     REGION: ${self:provider.region}
     ACCOUNT_ID: '#{AWS::AccountId}'
