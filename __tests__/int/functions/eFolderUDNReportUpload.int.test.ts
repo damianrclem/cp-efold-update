@@ -27,13 +27,30 @@ describe('eFolderUDNReportUpload', () => {
         await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields is missing on event payload");
     }, testTimeout)
 
+    test('throws InvalidEventParamsError if event is missing file number', async () => {
+        const invalidHandler = handler({
+            detail: {
+                loan: {
+                    id: "whatever"
+                },
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
+            }
+        }, {}, () => { });
+        await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
+        await expect(invalidHandler).rejects.toThrow("Required parameter detail.fields['CX.CP.UDN.FILENUMBER'] is missing on event payload");
+    }, testTimeout)
+
     test('does not upload a udn report if the loan is not found', async () => {
         const response = await handler({
             detail: {
                 loan: {
                     id: "whatever",
                 },
-                fields: {}
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
             }
         }, {}, () => { });
 
@@ -53,7 +70,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: testLoanId,
                 },
-                fields: {}
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
             }
         }
 
@@ -89,7 +108,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: testLoanId,
                 },
-                fields: {}
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
             }
         }
 
