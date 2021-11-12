@@ -88,6 +88,8 @@ functions:
                 'CX.CP.MANUALUDNPULLFLAG':
                   - exists: false
                   - anything-but: "1"
+                'CX.CP.UDN.FILENUMBER':
+                  - anything-but: ""
 
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
@@ -104,7 +106,9 @@ functions:
                   - anything-but: ""
               fields:
                 'CX.CP.MANUALUDNPULLFLAG':
-                  - "1"            
+                  - "1"
+                'CX.CP.UDN.FILENUMBER':
+                  - anything-but: ""
 
       - eventBridge:
           eventBus: ${self:custom.creditPlusEventBusArn}
@@ -122,6 +126,8 @@ functions:
               fields:
                 'Log.MS.LastCompleted':
                   - Resubmittal
+                'CX.CP.UDN.FILENUMBER':
+                  - anything-but: ""
 
     iamRoleStatements:
       - Effect: Allow
