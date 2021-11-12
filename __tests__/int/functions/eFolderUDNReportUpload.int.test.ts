@@ -33,9 +33,7 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: "whatever"
                 },
-                fields: {
-                    'CX.CP.UDN.FILENUMBER': '123'
-                }
+                fields: {}
             }
         }, {}, () => { });
         await expect(invalidHandler).rejects.toThrow(InvalidEventParamsError);
