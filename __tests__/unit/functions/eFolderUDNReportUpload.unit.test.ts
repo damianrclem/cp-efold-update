@@ -56,13 +56,30 @@ describe('eFolderUDNReportUpload', () => {
         await expect(handlerWithNoFields).rejects.toThrow('Required parameter detail.fields is missing on event payload');
     });
 
+    test('it throws an InvalidEventParamsError if CX.CP.UDN.FILENUMBER is not on the event detail payload', async () => {
+        const handlerWithNoFileNumber = handler({
+            detail: {
+                loan: {
+                    id: '123'
+                },
+                fields: {
+                }
+            }
+        }, {}, () => { })
+
+        await expect(handlerWithNoFileNumber).rejects.toThrow(InvalidEventParamsError);
+        await expect(handlerWithNoFileNumber).rejects.toThrow("Required parameter detail.fields['CX.CP.UDN.FILENUMBER'] is missing on event payload");
+    });
+
     test('it does not upload a udn report if no loan was found in the database', async () => {
         const response = await handler({
             detail: {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
             }
         }, {}, () => { });
 
@@ -80,7 +97,9 @@ describe('eFolderUDNReportUpload', () => {
                 loan: {
                     id: '123',
                 },
-                fields: {}
+                fields: {
+                    'CX.CP.UDN.FILENUMBER': '123'
+                }
             }
         }, {}, () => { });
 
@@ -95,7 +114,9 @@ describe('eFolderUDNReportUpload', () => {
 
     test('it does not upload a udn report if the loan audit fields have not changed', async () => {
         const testItem = {};
-        const fields = {};
+        const fields = {
+            'CX.CP.UDN.FILENUMBER': '123'
+        };
         AUDIT_FIELDS.forEach((field) => {
             const value = new Date().toString();
             testItem[field] = value;
@@ -153,7 +174,8 @@ describe('eFolderUDNReportUpload', () => {
                     id: '123',
                 },
                 fields: {
-                    [AUDIT_FIELDS[0]]: 'a value'
+                    [AUDIT_FIELDS[0]]: 'a value',
+                    'CX.CP.UDN.FILENUMBER': '123'
                 }
             }
         }, {}, () => { });
@@ -201,7 +223,8 @@ describe('eFolderUDNReportUpload', () => {
                     id: '123',
                 },
                 fields: {
-                    [AUDIT_FIELDS[0]]: 'a value'
+                    [AUDIT_FIELDS[0]]: 'a value',
+                    'CX.CP.UDN.FILENUMBER': '123'
                 }
             }
         }, {}, () => { });
@@ -245,7 +268,8 @@ describe('eFolderUDNReportUpload', () => {
                     id: '123',
                 },
                 fields: {
-                    [AUDIT_FIELDS[0]]: 'a value'
+                    [AUDIT_FIELDS[0]]: 'a value',
+                    'CX.CP.UDN.FILENUMBER': '123'
                 }
             }
         }, {}, () => { })).rejects.toThrow(LoanDocumentForUDNReportsNotFoundError);
@@ -286,7 +310,8 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value',
                     '4004': 'Billy',
                     '4006': 'Bob',
-                    '97': 'the clown'
+                    '97': 'the clown',
+                    'CX.CP.UDN.FILENUMBER': '123'
                 }
             }
         }, {}, () => { });
@@ -337,7 +362,8 @@ describe('eFolderUDNReportUpload', () => {
                     [AUDIT_FIELDS[0]]: 'a value',
                     '4004': 'Billy',
                     '4006': 'Bob',
-                    '97': 'the clown'
+                    '97': 'the clown',
+                    'CX.CP.UDN.FILENUMBER': '123'
                 }
             }
         }, {}, () => { });

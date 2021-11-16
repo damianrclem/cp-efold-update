@@ -71,6 +71,10 @@ export const handler: Handler = async (event: Event): Promise<Response> => {
         throw new InvalidEventParamsError("detail.fields", event);
     }
 
+    if (!fields["CX.CP.UDN.FILENUMBER"]) {
+        throw new InvalidEventParamsError("detail.fields['CX.CP.UDN.FILENUMBER']", event);
+    }
+
     const isResubmittal = fields["Log.MS.LastCompleted"] === 'Resubmittal';
     const isCreditPlusFlagSet = fields["CX.CP.MANUALUDNPULLFLAG"] === '1';
 
