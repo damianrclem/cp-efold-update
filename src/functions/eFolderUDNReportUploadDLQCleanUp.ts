@@ -35,10 +35,16 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
         throw new Error('No queue url found for queue name');
     }
 
-    const messagesToProcess: Message[] = [];
+    // Get all the messages from the DLQ
+    const allMessages: Message[] = [];
 
     let pollForMessages = true;
     do {
+        // NOTE: We can only get 10 messages per request.
+        // That message will remain in flight until the Visibilty Timeout threshold has been crossed.
+        // If it is, then those messages will come back in the next request and we may never make it to the end of the queue.
+        // Because of this, no potentially long running requests should be happeneing here.
+
         const { Messages } = await sqsClient.send(new ReceiveMessageCommand({
             QueueUrl,
         }));
@@ -48,26 +54,14 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
             return;
         }
 
-        const entriesToRemove: DeleteMessageBatchRequestEntry[] = [];
-
         Messages.forEach((message) => {
-            messagesToProcess.push(message);
-
-            entriesToRemove.push({
-                Id: message.MessageId,
-                ReceiptHandle: message.ReceiptHandle
-            })
+            allMessages.push(message);
         })
-
-        await sqsClient.send(new DeleteMessageBatchCommand({
-            QueueUrl,
-            Entries: entriesToRemove,
-        }))
     }
     while (pollForMessages);
 
     const loanErrorMessages: LoanErrorMessage[] = [];
-    messagesToProcess.forEach((message: Message) => {
+    allMessages.forEach((message: Message) => {
         if (!message.MessageId || !message.Body || !message.ReceiptHandle) {
             return;
         }
@@ -89,7 +83,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
         const errorMessagesByReceivedDate = orderBy(errorMessages, (x => x.receivedAt), ['desc']);
 
         const mostRecentErrorMessage = errorMessagesByReceivedDate[0];
-        const message = messagesToProcess.find((x => x.MessageId === mostRecentErrorMessage.id));
+        const message = allMessages.find((x => x.MessageId === mostRecentErrorMessage.id));
         if (!message) {
             return;
         }
