@@ -1,8 +1,10 @@
 import { ScheduledEvent, ScheduledHandler } from 'aws-lambda';
 import { SQSClient, ReceiveMessageCommand, GetQueueUrlCommand, Message, DeleteMessageBatchCommand, DeleteMessageBatchRequestEntry, SendMessageBatchRequest, SendMessageBatchCommand, SendMessageBatchRequestEntry } from '@aws-sdk/client-sqs';
 import get from 'lodash/get';
-import groupBy from 'lodash/groupBy';
 import orderBy from 'lodash/orderBy';
+import filter from 'lodash/filter';
+import groupBy from 'lodash/groupBy';
+import { Dictionary } from 'lodash';
 
 interface LoanErrorMessage {
     id: string;
@@ -16,7 +18,7 @@ interface LoanErrorMessage {
  * @param {ScheduledEvent} event
  * @returns {Promise<void>}
  */
-export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<void> => {
+export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void> => {
     const region = get(process, 'env.REGION');
     if (!region) throw new Error('Environment missing region');
 
@@ -41,7 +43,7 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
     let pollForMessages = true;
     do {
         // NOTE: We can only get 10 messages per request.
-        // That message will remain in flight until the Visibilty Timeout threshold has been crossed.
+        // That message will remain in flight until the Visibilty Timeout threshold has been crossed. The threshold is currently 30 seconds.
         // If it is, then those messages will come back in the next request and we may never make it to the end of the queue.
         // Because of this, no potentially long running requests should be happeneing here.
 
@@ -50,8 +52,9 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
         }));
 
         if (!Messages || Messages.length === 0) {
+            console.log("stop poling")
             pollForMessages = false;
-            return;
+            break;
         }
 
         Messages.forEach((message) => {
@@ -60,13 +63,22 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
     }
     while (pollForMessages);
 
+    // Parse the bodies of the messages to something we can sort and then get uniquely.
     const loanErrorMessages: LoanErrorMessage[] = [];
     allMessages.forEach((message: Message) => {
+        // This should never happen, but these are potentially properties than can be undefined.
         if (!message.MessageId || !message.Body || !message.ReceiptHandle) {
+            console.error(`Message did not have expected payload to deduplicate ${JSON.stringify(message)}`);
             return;
         }
 
         const body = JSON.parse(message.Body);
+
+        if (!body.detail || !body.detail.loan || !body.detail.loan.id) {
+            console.error(`Message body did not have required data needed to deduplicate ${JSON.stringify(message.Body)}`);
+            return;
+        }
+
         loanErrorMessages.push({
             id: message.MessageId,
             loanId: body.detail.loan.id,
@@ -75,27 +87,43 @@ export const handler: ScheduledHandler = async (event: ScheduledEvent): Promise<
         })
     });
 
-    const uniqueLoanErrorMessages: SendMessageBatchRequestEntry[] = [];
+    // Let's now order the error messages by date, with the latest one being first.
+    const errorMessagesSortedByReceivedDate = orderBy(loanErrorMessages, (x => x.receivedAt), ['desc']);
 
-    const loanErrorMessagesGroupedByLoanId = groupBy(loanErrorMessages, (x) => x.loanId);
-    Object.entries(loanErrorMessagesGroupedByLoanId).forEach((entry) => {
-        const [_, errorMessages] = entry;
-        const errorMessagesByReceivedDate = orderBy(errorMessages, (x => x.receivedAt), ['desc']);
+    // Group the messages by loanId.
+    const sortedErrorMessagesGroupedByLoanId: Dictionary<LoanErrorMessage[]> = groupBy(errorMessagesSortedByReceivedDate, (x => x.loanId));
 
-        const mostRecentErrorMessage = errorMessagesByReceivedDate[0];
-        const message = allMessages.find((x => x.MessageId === mostRecentErrorMessage.id));
+    console.log(sortedErrorMessagesGroupedByLoanId['123'].length)
+
+    // Grab the duplicated errors.
+    // Go through the entries of our dictionary.
+    // For each entry, filter out the first values for each key. 
+    // Since the entries are sorted by newest first, we just need to remove the first item in these arrays.
+    const duplicatedErrorMessages: LoanErrorMessage[] = [];
+    Object.values(sortedErrorMessagesGroupedByLoanId).forEach((errorMessageGrouping) => {
+        errorMessageGrouping.forEach((errorMessage, index) => {
+            if (index === 0) return;
+            duplicatedErrorMessages.push(errorMessage)
+        })
+    })
+
+    console.log("errorMessages", duplicatedErrorMessages.length);
+
+    const messagesToRemove: DeleteMessageBatchRequestEntry[] = [];
+    duplicatedErrorMessages.forEach((duplicateMessage) => {
+        const message = allMessages.find((x => x.MessageId === duplicateMessage.id))
         if (!message) {
             return;
         }
 
-        uniqueLoanErrorMessages.push({
+        messagesToRemove.push({
             Id: message.MessageId,
-            MessageBody: message.Body
-        });
-    });
+            ReceiptHandle: message.ReceiptHandle
+        })
+    })
 
-    await sqsClient.send(new SendMessageBatchCommand({
+    await sqsClient.send(new DeleteMessageBatchCommand({
         QueueUrl,
-        Entries: uniqueLoanErrorMessages
+        Entries: messagesToRemove
     }))
 };
