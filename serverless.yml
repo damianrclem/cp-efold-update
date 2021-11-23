@@ -178,6 +178,15 @@ functions:
           - dynamodb:PutItem
         Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.tableName}"
 
+  eFolderUDNReportUploadDLQCleanUp:
+    handler: src/functions/eFolderUDNReportUploadDLQCleanUp.handler
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - "sqs:ReceiveMessage"
+          - "sqs:DeleteMessage"
+        Resource: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq"
+
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
   - ${file(./resources/replayQueue.yml)}
