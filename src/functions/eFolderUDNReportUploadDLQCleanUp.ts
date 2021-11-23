@@ -12,10 +12,15 @@ interface LoanErrorMessage {
     receiptHandle: string;
 }
 
+interface Response {
+    OriginalTotalMessages: number;
+    TotalMessagesRemoved: number;
+}
+
 /**
  * Runs periodically to remove duplicate loans from the eFolderUDNReportDLQ
  * @param {ScheduledEvent} event
- * @returns {Promise<void>}
+ * @returns {Promise<Response>}
  */
 export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void> => {
     const region = get(process, 'env.REGION');
@@ -51,7 +56,6 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
         }));
 
         if (!Messages || Messages.length === 0) {
-            console.log("stop poling")
             pollForMessages = false;
             break;
         }
@@ -92,8 +96,6 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
     // Group the messages by loanId.
     const sortedErrorMessagesGroupedByLoanId: Dictionary<LoanErrorMessage[]> = groupBy(errorMessagesSortedByReceivedDate, (x => x.loanId));
 
-    console.log(sortedErrorMessagesGroupedByLoanId['123'].length)
-
     // Grab the duplicated errors.
     // Go through the entries of our dictionary.
     // For each entry, filter out the first values for each key. 
@@ -130,4 +132,6 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
             Entries: messageBatch
         }))
     }
+
+    console.log(`${messagesToRemove.length} duplicate errors removed from the queue.`)
 };
