@@ -2,7 +2,6 @@ import { ScheduledEvent, ScheduledHandler } from 'aws-lambda';
 import { SQSClient, ReceiveMessageCommand, GetQueueUrlCommand, Message, DeleteMessageBatchCommand, DeleteMessageBatchRequestEntry, SendMessageBatchRequest, SendMessageBatchCommand, SendMessageBatchRequestEntry } from '@aws-sdk/client-sqs';
 import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
-import filter from 'lodash/filter';
 import groupBy from 'lodash/groupBy';
 import { Dictionary } from 'lodash';
 
