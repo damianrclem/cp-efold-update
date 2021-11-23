@@ -104,10 +104,9 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
             if (index === 0) return;
             duplicatedErrorMessages.push(errorMessage)
         })
-    })
+    });
 
-    console.log("errorMessages", duplicatedErrorMessages.length);
-
+    // Now that we have the duplicated messages, get the original payload of the duplicated message and send that to sqs to delete.
     const messagesToRemove: DeleteMessageBatchRequestEntry[] = [];
     duplicatedErrorMessages.forEach((duplicateMessage) => {
         const message = allMessages.find((x => x.MessageId === duplicateMessage.id))
@@ -119,10 +118,16 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
             Id: message.MessageId,
             ReceiptHandle: message.ReceiptHandle
         })
-    })
+    });
 
-    await sqsClient.send(new DeleteMessageBatchCommand({
-        QueueUrl,
-        Entries: messagesToRemove
-    }))
+    // We can only request to delete 10 messages at a time. So, we need to do this in batches.
+    const batchSize = 10;
+    for (let index = 0; index < messagesToRemove.length; index += batchSize) {
+        const messageBatch = messagesToRemove.slice(index, index + batchSize);
+
+        await sqsClient.send(new DeleteMessageBatchCommand({
+            QueueUrl,
+            Entries: messageBatch
+        }))
+    }
 };
