@@ -186,6 +186,8 @@ functions:
           - "sqs:ReceiveMessage"
           - "sqs:DeleteMessage"
         Resource: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq"
+    environment:
+      QUEUE_NAME: ${self:custom.stage}-cp-efolder-upload-dlq
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
