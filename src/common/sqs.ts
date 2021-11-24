@@ -1,4 +1,4 @@
-import { GetQueueUrlCommand, SQSClient, Message, ReceiveMessageCommand } from "@aws-sdk/client-sqs"
+import { GetQueueUrlCommand, SQSClient, Message, ReceiveMessageCommand, DeleteMessageBatchRequestEntry, DeleteMessageBatchCommand } from "@aws-sdk/client-sqs"
 
 interface GetAllMessagesParams {
     queueName: string;
@@ -50,4 +50,41 @@ export const getAllMessages = async (params: GetAllMessagesParams): Promise<Mess
     while (pollForMessages);
 
     return allMessages;
+}
+
+interface DeleteMessagesParams {
+    region: string;
+    queueName: string;
+    messages: DeleteMessageBatchRequestEntry[];
+}
+
+/**
+ * Delete messages in a SQS queue.
+ * SQS limits the number of messages to delete in one request to 10. This will delete messages in batches of 10.
+ * @param {DeleteMessagesParams} params - The params needed to delete messasges.
+ * @param {string} parmas.region - The region the queue resides.
+ * @param {string} params.queueName - The name of the queue.
+ * @param {DeleteMessageBatchRequestEntry[]} params.messages - The messages to delete.
+ * @returns {Promise<void>}
+ */
+export const deleteMessages = async (params: DeleteMessagesParams): Promise<void> => {
+    const sqsClient = new SQSClient({
+        region: params.region,
+    })
+
+    const { QueueUrl } = await sqsClient.send(new GetQueueUrlCommand({
+        QueueName: params.queueName
+    }));
+
+    const { messages } = params;
+
+    const batchSize = 10;
+    for (let index = 0; index < messages.length; index += batchSize) {
+        const messageBatch = messages.slice(index, index + batchSize);
+
+        await sqsClient.send(new DeleteMessageBatchCommand({
+            QueueUrl,
+            Entries: messageBatch
+        }));
+    }
 }

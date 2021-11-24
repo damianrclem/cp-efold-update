@@ -1,10 +1,10 @@
 import { ScheduledEvent, ScheduledHandler } from 'aws-lambda';
-import { SQSClient, ReceiveMessageCommand, GetQueueUrlCommand, Message, DeleteMessageBatchCommand, DeleteMessageBatchRequestEntry, SendMessageBatchRequest, SendMessageBatchCommand, SendMessageBatchRequestEntry } from '@aws-sdk/client-sqs';
+import { Message, DeleteMessageBatchRequestEntry } from '@aws-sdk/client-sqs';
 import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
 import groupBy from 'lodash/groupBy';
 import { Dictionary } from 'lodash';
-import { getAllMessages } from '../common/sqs';
+import { deleteMessages, getAllMessages } from '../common/sqs';
 
 interface LoanErrorMessage {
     id: string;
@@ -24,18 +24,6 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
 
     const queueName = get(process, 'env.QUEUE_NAME');
     if (!queueName) throw new Error('Environment missing queue name');
-
-    const sqsClient = new SQSClient({
-        region
-    });
-
-    const { QueueUrl } = await sqsClient.send(new GetQueueUrlCommand({
-        QueueName: queueName
-    }))
-
-    if (!QueueUrl) {
-        throw new Error('No queue url found for queue name');
-    }
 
     // Get all the messages from the DLQ
     const allMessages: Message[] = await getAllMessages({
@@ -100,15 +88,11 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
     });
 
     // We can only request to delete 10 messages at a time. So, we need to do this in batches.
-    const batchSize = 10;
-    for (let index = 0; index < messagesToRemove.length; index += batchSize) {
-        const messageBatch = messagesToRemove.slice(index, index + batchSize);
-
-        await sqsClient.send(new DeleteMessageBatchCommand({
-            QueueUrl,
-            Entries: messageBatch
-        }))
-    }
+    await deleteMessages({
+        region,
+        queueName,
+        messages: messagesToRemove
+    });
 
     console.log(`${messagesToRemove.length} duplicate errors removed from the queue.`)
 };
