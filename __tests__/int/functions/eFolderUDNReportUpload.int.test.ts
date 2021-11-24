@@ -154,6 +154,7 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id,
+                    loanNumber: Date.now().toString()
                 },
                 fields: {
                     '4000': borrowerFirstName,
@@ -219,6 +220,7 @@ describe('eFolderUDNReportUpload', () => {
             detail: {
                 loan: {
                     id,
+                    loanNumber: Date.now().toString()
                 },
                 fields: {
                     'CX.CP.UDN.FILENUMBER': VendorOrderId,
