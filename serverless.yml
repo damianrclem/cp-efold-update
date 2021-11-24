@@ -183,8 +183,10 @@ functions:
     timeout: 30
     events:
       - schedule: rate(5 minutes)
+    iamRoleStatementsName: efolder-dlq-clean-up
     iamRoleStatements:
       - Effect: Allow
+        Name: 
         Action:
           - "sqs:GetQueueUrl"
           - "sqs:ReceiveMessage"
