@@ -1,10 +1,8 @@
 import { ScheduledEvent, ScheduledHandler } from 'aws-lambda';
 import { Message, DeleteMessageBatchRequestEntry } from '@aws-sdk/client-sqs';
 import get from 'lodash/get';
-import orderBy from 'lodash/orderBy';
-import groupBy from 'lodash/groupBy';
-import { Dictionary } from 'lodash';
 import { deleteMessages, getAllMessages } from '../common/sqs';
+import { getDuplicatedLoanErrorMessages } from '../helpers/getDuplicatedLoanErrorMessages';
 
 interface LoanErrorMessage {
     id: string;
@@ -32,60 +30,14 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
     });
 
     // Parse the bodies of the messages to something we can sort and then get uniquely.
-    const loanErrorMessages: LoanErrorMessage[] = [];
-    allMessages.forEach((message: Message) => {
-        // This should never happen, but these are potentially properties than can be undefined.
-        if (!message.MessageId || !message.Body || !message.ReceiptHandle) {
-            console.error(`Message did not have expected payload to deduplicate ${JSON.stringify(message)}`);
-            return;
-        }
+    const duplicateMessages = getDuplicatedLoanErrorMessages(allMessages);
 
-        const body = JSON.parse(message.Body);
-
-        if (!body.detail || !body.detail.loan || !body.detail.loan.id) {
-            console.error(`Message body did not have required data needed to deduplicate ${JSON.stringify(message.Body)}`);
-            return;
-        }
-
-        loanErrorMessages.push({
-            id: message.MessageId,
-            loanId: body.detail.loan.id,
-            receivedAt: new Date(body.time),
-            receiptHandle: message.ReceiptHandle
-        })
-    });
-
-    // Let's now order the error messages by date, with the latest one being first.
-    const errorMessagesSortedByReceivedDate = orderBy(loanErrorMessages, (x => x.receivedAt), ['desc']);
-
-    // Group the messages by loanId.
-    const sortedErrorMessagesGroupedByLoanId: Dictionary<LoanErrorMessage[]> = groupBy(errorMessagesSortedByReceivedDate, (x => x.loanId));
-
-    // Grab the duplicated errors.
-    // Go through the entries of our dictionary.
-    // For each entry, filter out the first values for each key. 
-    // Since the entries are sorted by newest first, we just need to remove the first item in these arrays.
-    const duplicatedErrorMessages: LoanErrorMessage[] = [];
-    Object.values(sortedErrorMessagesGroupedByLoanId).forEach((errorMessageGrouping) => {
-        errorMessageGrouping.forEach((errorMessage, index) => {
-            if (index === 0) return;
-            duplicatedErrorMessages.push(errorMessage)
-        })
-    });
-
-    // Now that we have the duplicated messages, get the original payload of the duplicated message and send that to sqs to delete.
-    const messagesToRemove: DeleteMessageBatchRequestEntry[] = [];
-    duplicatedErrorMessages.forEach((duplicateMessage) => {
-        const message = allMessages.find((x => x.MessageId === duplicateMessage.id))
-        if (!message) {
-            return;
-        }
-
-        messagesToRemove.push({
+    const messagesToRemove: DeleteMessageBatchRequestEntry[] = duplicateMessages.map((message) => {
+        return {
             Id: message.MessageId,
             ReceiptHandle: message.ReceiptHandle
-        })
-    });
+        }
+    })
 
     // We can only request to delete 10 messages at a time. So, we need to do this in batches.
     await deleteMessages({
