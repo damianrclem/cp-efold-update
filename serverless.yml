@@ -180,6 +180,9 @@ functions:
 
   eFolderUDNReportUploadDLQCleanUp:
     handler: src/functions/eFolderUDNReportUploadDLQCleanUp.handler
+    timeout: 30
+    events:
+      - schedule: rate(5 minutes)
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -187,7 +190,7 @@ functions:
           - "sqs:DeleteMessage"
         Resource: "arn:aws:sqs:#{AWS::Region}:#{AWS::AccountId}:${self:service}-${self:custom.stage}-eFolderUDNReportUpload-dlq"
     environment:
-      QUEUE_NAME: ${self:custom.stage}-cp-efolder-upload-dlq
+      QUEUE_NAME: cp-efolder-upload-${self:custom.stage}-eFolderUDNReportUpload-dlq
 
 resources:
   - ${file(./resources/cpEFolderUploadUDNOrders.yml)}
