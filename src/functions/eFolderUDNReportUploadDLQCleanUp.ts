@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
 import groupBy from 'lodash/groupBy';
 import { Dictionary } from 'lodash';
+import { getAllMessages } from '../common/sqs';
 
 interface LoanErrorMessage {
     id: string;
@@ -37,29 +38,10 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
     }
 
     // Get all the messages from the DLQ
-    const allMessages: Message[] = [];
-
-    let pollForMessages = true;
-    do {
-        // NOTE: We can only get 10 messages per request.
-        // That message will remain in flight until the Visibilty Timeout threshold has been crossed. The threshold is currently 30 seconds.
-        // If the threshold is crossed, then those messages will come back in the next request and we may never make it to the end of the queue.
-        // Because of this, no potentially long running requests should be happening here.
-
-        const { Messages } = await sqsClient.send(new ReceiveMessageCommand({
-            QueueUrl,
-        }));
-
-        if (!Messages || Messages.length === 0) {
-            pollForMessages = false;
-            break;
-        }
-
-        Messages.forEach((message) => {
-            allMessages.push(message);
-        })
-    }
-    while (pollForMessages);
+    const allMessages: Message[] = await getAllMessages({
+        region,
+        queueName,
+    });
 
     // Parse the bodies of the messages to something we can sort and then get uniquely.
     const loanErrorMessages: LoanErrorMessage[] = [];
