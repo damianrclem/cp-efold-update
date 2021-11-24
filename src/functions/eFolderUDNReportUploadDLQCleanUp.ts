@@ -12,11 +12,6 @@ interface LoanErrorMessage {
     receiptHandle: string;
 }
 
-interface Response {
-    OriginalTotalMessages: number;
-    TotalMessagesRemoved: number;
-}
-
 /**
  * Runs periodically to remove duplicate loans from the eFolderUDNReportDLQ
  * @param {ScheduledEvent} event
