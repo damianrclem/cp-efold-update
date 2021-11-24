@@ -43,8 +43,8 @@ export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void
     do {
         // NOTE: We can only get 10 messages per request.
         // That message will remain in flight until the Visibilty Timeout threshold has been crossed. The threshold is currently 30 seconds.
-        // If it is, then those messages will come back in the next request and we may never make it to the end of the queue.
-        // Because of this, no potentially long running requests should be happeneing here.
+        // If the threshold is crossed, then those messages will come back in the next request and we may never make it to the end of the queue.
+        // Because of this, no potentially long running requests should be happening here.
 
         const { Messages } = await sqsClient.send(new ReceiveMessageCommand({
             QueueUrl,
