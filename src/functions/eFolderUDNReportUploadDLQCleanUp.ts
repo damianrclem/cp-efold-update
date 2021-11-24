@@ -16,7 +16,7 @@ interface LoanErrorMessage {
 /**
  * Runs periodically to remove duplicate loans from the eFolderUDNReportDLQ
  * @param {ScheduledEvent} event
- * @returns {Promise<Response>}
+ * @returns {Promise<void>}
  */
 export const handler: ScheduledHandler = async (_: ScheduledEvent): Promise<void> => {
     const region = get(process, 'env.REGION');
