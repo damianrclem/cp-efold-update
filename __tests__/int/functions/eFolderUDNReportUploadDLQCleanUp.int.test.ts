@@ -2,12 +2,9 @@
 import { GetQueueUrlCommand, PurgeQueueCommand, SendMessageBatchCommand, SendMessageBatchRequestEntry, SQSClient } from "@aws-sdk/client-sqs";
 import { v4 as uuid } from 'uuid';
 import { handler } from "../../../src/functions/eFolderUDNReportUploadDLQCleanUp";
+import { randomNumberFromInterval } from "../../randomNumberFromInterval";
 
 let OLD_ENV;
-
-const randomNumberFromInterval = (min, max) => {
-    return Math.floor(Math.random() * (max -  min + 1) - min);
-}
 
 const createTestMessages = async (numberOfUniqueMessages: number, numberOfDuplicates: number) => {
     const messages: SendMessageBatchRequestEntry[] = [];
