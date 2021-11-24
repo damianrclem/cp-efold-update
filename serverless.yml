@@ -186,7 +186,6 @@ functions:
     iamRoleStatementsName: efolder-dlq-clean-up
     iamRoleStatements:
       - Effect: Allow
-        Name: 
         Action:
           - "sqs:GetQueueUrl"
           - "sqs:ReceiveMessage"
