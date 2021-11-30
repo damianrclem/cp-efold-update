@@ -181,8 +181,9 @@ functions:
   eFolderUDNReportUploadDLQCleanUp:
     handler: src/functions/eFolderUDNReportUploadDLQCleanUp.handler
     timeout: 30
-    events:
-      - schedule: rate(5 minutes)
+    # Commenting this out until we can find a way for polling messages to not retrigger the DLQ alarm
+    # events:
+    #   - schedule: rate(5 minutes)
     iamRoleStatementsName: efolder-dlq-clean-up
     iamRoleStatements:
       - Effect: Allow
