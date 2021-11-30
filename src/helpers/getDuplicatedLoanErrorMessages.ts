@@ -1,7 +1,7 @@
 import { Message } from "@aws-sdk/client-sqs";
 import orderBy from 'lodash/orderBy';
 import groupBy from 'lodash/groupBy';
-import { Dictionary } from 'lodash';
+import { Dictionary, get } from 'lodash';
 
 interface LoanErrorMessage {
     id: string;
@@ -22,14 +22,16 @@ export const getDuplicatedLoanErrorMessages = (messages: Message[]): Message[] =
 
         const body = JSON.parse(message.Body);
 
-        if (!body.detail || !body.detail.loan || !body.detail.loan.id) {
-            console.error(`Message body did not have required data needed to deduplicate ${JSON.stringify(message.Body)}`);
+        const loanId = get(body, 'detail.requestPayload.loan.id');
+
+        if (!loanId) {
+            console.error(`Message body does not have loan id needed for deduplication ${JSON.stringify(message.Body)}`);
             return;
         }
 
         loanErrorMessages.push({
             id: message.MessageId,
-            loanId: body.detail.loan.id,
+            loanId,
             receivedAt: new Date(body.time),
             receiptHandle: message.ReceiptHandle
         })

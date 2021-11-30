@@ -16,8 +16,10 @@ describe('getDuplicatedLoanErrorMessages', () => {
                 Body: JSON.stringify({
                     time: new Date().toString(),
                     detail: {
-                        loan: {
-                            id: loanId
+                        requestPayload: {
+                            loan: {
+                                id: loanId
+                            }
                         }
                     }
                 }),
@@ -31,8 +33,10 @@ describe('getDuplicatedLoanErrorMessages', () => {
                     Body: JSON.stringify({
                         time: new Date().toString(),
                         detail: {
-                            loan: {
-                                id: loanId
+                            requestPayload: {
+                                loan: {
+                                    id: loanId
+                                }
                             }
                         }
                     }),
