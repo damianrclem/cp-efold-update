@@ -22,7 +22,7 @@ export const getDuplicatedLoanErrorMessages = (messages: Message[]): Message[] =
 
         const body = JSON.parse(message.Body);
 
-        const loanId = get(body, 'detail.requestPayload.loan.id');
+        const loanId = get(body, 'detail.requestPayload.detail.loan.id');
 
         if (!loanId) {
             console.error(`Message body does not have loan id needed for deduplication ${JSON.stringify(message.Body)}`);

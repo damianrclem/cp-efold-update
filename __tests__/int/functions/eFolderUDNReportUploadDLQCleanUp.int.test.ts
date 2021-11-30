@@ -19,8 +19,10 @@ const createTestMessages = async (numberOfUniqueMessages: number, numberOfDuplic
                     time: new Date().toString(),
                     detail: {
                         requestPayload: {
-                            loan: {
-                                id: loanId
+                            detail: {
+                                loan: {
+                                    id: loanId
+                                }
                             }
                         }
                     }

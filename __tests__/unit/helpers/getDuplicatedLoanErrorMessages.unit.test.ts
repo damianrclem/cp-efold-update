@@ -17,8 +17,10 @@ describe('getDuplicatedLoanErrorMessages', () => {
                     time: new Date().toString(),
                     detail: {
                         requestPayload: {
-                            loan: {
-                                id: loanId
+                            detail: {
+                                loan: {
+                                    id: loanId
+                                }
                             }
                         }
                     }
