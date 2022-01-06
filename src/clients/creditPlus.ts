@@ -177,6 +177,8 @@ export const getUDNOrder = async (params: GetUDNOrderParams): Promise<AxiosRespo
 </MESSAGE>`;
 
 	const response = await axios.post(url, xmls, { headers });
+	console.log('UPLOAD UDN RESPONSE');
+	console.log(response.data);
 	return response;
 }
 
